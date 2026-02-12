@@ -25,13 +25,13 @@ void OtaManager::begin(AsyncWebServer* server) {
     _server = server;
 
     // Set up ElegantOTA callbacks for progress tracking
-    AsyncElegantOTA.onStart([this]() {
+    ElegantOTA.onStart([this]() {
         _updating = true;
         _progress = 0;
         Serial.println("[OTA] Update started.");
     });
 
-    AsyncElegantOTA.onProgress([this](size_t current, size_t total) {
+    ElegantOTA.onProgress([this](size_t current, size_t total) {
         if (total > 0) {
             _progress = (uint8_t)((current * 100) / total);
         }
@@ -45,7 +45,7 @@ void OtaManager::begin(AsyncWebServer* server) {
         }
     });
 
-    AsyncElegantOTA.onEnd([this](bool success) {
+    ElegantOTA.onEnd([this](bool success) {
         _updating = false;
         if (success) {
             Serial.println("[OTA] Update successful! Rebooting...");
@@ -58,7 +58,7 @@ void OtaManager::begin(AsyncWebServer* server) {
     });
 
     // Register the /update endpoint on the existing web server
-    AsyncElegantOTA.begin(_server);
+    ElegantOTA.begin(_server);
 
     _initialized = true;
     Serial.println("[OTA] ElegantOTA initialized at /update");
@@ -67,10 +67,9 @@ void OtaManager::begin(AsyncWebServer* server) {
 
 void OtaManager::update() {
 #ifndef NATIVE_BUILD
-    // AsyncElegantOTA handles everything asynchronously via the web server.
+    // ElegantOTA handles everything asynchronously via the web server.
     // This method is provided for interface consistency with other managers.
-    // ElegantOTA v2.x uses AsyncElegantOTA.loop() -- call it if available.
-    AsyncElegantOTA.loop();
+    ElegantOTA.loop();
 #endif
 }
 

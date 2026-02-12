@@ -4,10 +4,10 @@
 
 #ifndef NATIVE_BUILD
 #include <ESPAsyncWebServer.h>
-#include <AsyncElegantOTA.h>
+#include <ElegantOTA.h>
 #endif
 
-/// Manages over-the-air firmware updates via AsyncElegantOTA.
+/// Manages over-the-air firmware updates via ElegantOTA.
 /// Registers the /update endpoint on the existing AsyncWebServer.
 class OtaManager {
 public:
