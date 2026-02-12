@@ -187,7 +187,62 @@
       appendChartData(msg);
       updateCookTimer(msg);
       updatePredictions();
+    } else if (msg.type === 'history') {
+      loadHistory(msg);
     }
+  }
+
+  function loadHistory(msg) {
+    // Restore alarm targets and setpoint
+    if (msg.sp !== undefined) {
+      pitSetpoint = msg.sp;
+      dom.pitSetpoint.textContent = msg.sp;
+      dom.pitSpInput.value = msg.sp;
+    }
+    if (msg.meat1Target !== undefined && msg.meat1Target !== null) {
+      meat1Target = msg.meat1Target;
+      dom.meat1Target.textContent = msg.meat1Target;
+      dom.meat1TargetInput.value = msg.meat1Target;
+    }
+    if (msg.meat2Target !== undefined && msg.meat2Target !== null) {
+      meat2Target = msg.meat2Target;
+      dom.meat2Target.textContent = msg.meat2Target;
+      dom.meat2TargetInput.value = msg.meat2Target;
+    }
+
+    // Populate chart data from history
+    if (!msg.data || !msg.data.length) return;
+
+    // Reset chart arrays
+    for (var i = 0; i < chartData.length; i++) {
+      chartData[i] = [];
+    }
+
+    for (var j = 0; j < msg.data.length; j++) {
+      var d = msg.data[j];
+      chartData[0].push(d.ts);
+      chartData[1].push(d.pit !== null && d.pit !== undefined && d.pit !== -1 ? d.pit : null);
+      chartData[2].push(d.meat1 !== null && d.meat1 !== undefined && d.meat1 !== -1 ? d.meat1 : null);
+      chartData[3].push(d.meat2 !== null && d.meat2 !== undefined && d.meat2 !== -1 ? d.meat2 : null);
+      chartData[4].push(d.fan !== undefined ? d.fan : null);
+      chartData[5].push(d.damper !== undefined ? d.damper : null);
+    }
+
+    // Update display with the latest point
+    var last = msg.data[msg.data.length - 1];
+    updateTemperatures(last);
+    updateOutputs(last);
+
+    // Trigger cook timer from history (first valid meat reading)
+    for (var k = 0; k < msg.data.length; k++) {
+      updateCookTimer(msg.data[k]);
+      if (cookTimerStart) break;
+    }
+
+    if (chart) {
+      chart.setData(buildChartDataWithPrediction());
+    }
+    updatePredictions();
   }
 
   function updateTemperatures(msg) {

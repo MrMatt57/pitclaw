@@ -2,6 +2,7 @@
 // Express serves the web UI from firmware/data/, WebSocket sends simulated
 // temperature data using the same protocol as the real ESP32 firmware.
 
+const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const express = require('express');
@@ -9,11 +10,17 @@ const { WebSocketServer } = require('ws');
 const ThermalModel = require('./thermal-model');
 const profiles = require('./profiles');
 
+// Session persistence file (.dat so nodemon ignores it — it only watches .js/.json)
+const SESSION_FILE = path.join(__dirname, 'session.dat');
+
 // ---------------------------------------------------------------------------
 // CLI argument parsing (no extra dependencies)
 // ---------------------------------------------------------------------------
 function parseArgs(argv) {
-  const args = { speed: 1, profile: 'normal' };
+  const args = {
+    speed: parseFloat(process.env.SPEED) || 1,
+    profile: process.env.PROFILE || 'normal'
+  };
   for (let i = 2; i < argv.length; i++) {
     if (argv[i] === '--speed' && argv[i + 1]) {
       args.speed = parseFloat(argv[++i]) || 1;
@@ -64,6 +71,42 @@ let alarmTargets = {
   meat1Target: profile.meat1Target || null,
   meat2Target: profile.meat2Target || null
 };
+
+// ---------------------------------------------------------------------------
+// Session persistence (survives nodemon restarts)
+// ---------------------------------------------------------------------------
+function saveSession() {
+  const state = {
+    sessionData,
+    sessionStartTs,
+    currentSetpoint,
+    alarmTargets,
+    modelState: model.serialize()
+  };
+  try {
+    fs.writeFileSync(SESSION_FILE, JSON.stringify(state));
+  } catch (e) {
+    // Silently ignore write errors
+  }
+}
+
+function restoreSession() {
+  try {
+    if (!fs.existsSync(SESSION_FILE)) return false;
+    const raw = fs.readFileSync(SESSION_FILE, 'utf8');
+    const state = JSON.parse(raw);
+    sessionData = state.sessionData || [];
+    sessionStartTs = state.sessionStartTs || sessionStartTs;
+    currentSetpoint = state.currentSetpoint || currentSetpoint;
+    if (state.alarmTargets) alarmTargets = state.alarmTargets;
+    if (state.modelState) model.deserialize(state.modelState);
+    console.log(`  Restored session: ${sessionData.length} data points`);
+    return true;
+  } catch (e) {
+    console.log('  No session to restore (starting fresh)');
+    return false;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Estimated done time calculation
@@ -145,6 +188,7 @@ function handleMessage(ws, raw) {
         sessionData = [];
         sessionStartTs = Math.floor(Date.now() / 1000);
         currentSetpoint = profile.targetPitTemp;
+        try { fs.unlinkSync(SESSION_FILE); } catch (e) {}
       } else if (msg.action === 'download' && msg.format === 'csv') {
         const csv = generateCSV();
         ws.send(JSON.stringify({
@@ -173,6 +217,18 @@ function generateCSV() {
 
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected');
+
+  // Send session history so the client can populate the chart on refresh
+  if (sessionData.length > 0) {
+    ws.send(JSON.stringify({
+      type: 'history',
+      data: sessionData,
+      sp: currentSetpoint,
+      meat1Target: alarmTargets.meat1Target,
+      meat2Target: alarmTargets.meat2Target
+    }));
+    console.log(`Sent ${sessionData.length} history points to new client`);
+  }
 
   ws.on('message', (raw) => handleMessage(ws, raw.toString()));
   ws.on('close', () => console.log('WebSocket client disconnected'));
@@ -212,6 +268,9 @@ function startSimulation() {
     // Store in session history
     sessionData.push(dataPoint);
 
+    // Persist every 30 data points (~30s real time)
+    if (sessionData.length % 30 === 0) saveSession();
+
     // Compute estimated done time
     const est = estimateDoneTime();
 
@@ -248,12 +307,14 @@ server.listen(PORT, () => {
   console.log(`  Open http://localhost:${PORT} in your browser`);
   console.log('');
 
+  restoreSession();
   startSimulation();
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
   console.log('\nShutting down simulator...');
+  saveSession();
   clearInterval(simInterval);
   wss.close();
   server.close();
@@ -261,6 +322,7 @@ process.on('SIGINT', () => {
 });
 
 process.on('SIGTERM', () => {
+  saveSession();
   clearInterval(simInterval);
   wss.close();
   server.close();

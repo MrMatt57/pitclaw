@@ -341,6 +341,47 @@ class ThermalModel {
   }
 
   /**
+   * Serialize model state for persistence across restarts.
+   */
+  serialize() {
+    return {
+      pitTemp: this.pitTemp,
+      meat1Temp: this.meat1Temp,
+      meat2Temp: this.meat2Temp,
+      ambientTemp: this.ambientTemp,
+      setpoint: this.setpoint,
+      fanPercent: this.fanPercent,
+      damperPercent: this.damperPercent,
+      fireEnergy: this.fireEnergy,
+      fireOut: this.fireOut,
+      lidOpen: this.lidOpen,
+      lidOpenTimer: this.lidOpenTimer,
+      lidDropApplied: this.lidDropApplied,
+      preLidPitTemp: this.preLidPitTemp,
+      meat1Connected: this.meat1Connected,
+      meat2Connected: this.meat2Connected,
+      stallEnabled: this.stallEnabled,
+      stallTimeAccumulated: this.stallTimeAccumulated,
+      stallDurationSeconds: this.stallDurationSeconds,
+      inStall: this.inStall,
+      simTime: this.simTime,
+      pidIntegral: this.pidIntegral,
+      pidPrevError: this.pidPrevError,
+      hasReachedSetpoint: this.hasReachedSetpoint,
+      overshootRemaining: this.overshootRemaining,
+      events: this.events,
+      _noisePhase: this._noisePhase
+    };
+  }
+
+  /**
+   * Restore model state from a serialized object.
+   */
+  deserialize(s) {
+    Object.assign(this, s);
+  }
+
+  /**
    * Reset the model to initial conditions (for new session).
    */
   reset(profile) {
