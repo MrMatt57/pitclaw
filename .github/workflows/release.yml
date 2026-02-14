@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute version tag
+        id: version
+        run: |
+          DATE_TAG=$(date -u +"%Y.%-m.%-d")
+          BUILD_NUM=1
+
+          # Check for existing tags on the same day
+          while git tag -l "v${DATE_TAG}-beta.${BUILD_NUM}" | grep -q .; do
+            BUILD_NUM=$((BUILD_NUM + 1))
+          done
+
+          VERSION="${DATE_TAG}-beta.${BUILD_NUM}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Version: ${VERSION}"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            .pio
+          key: pio-${{ hashFiles('firmware/platformio.ini') }}
+          restore-keys: pio-
+
+      - name: Inject version into firmware
+        run: |
+          sed -i 's/#define FIRMWARE_VERSION    "dev"/#define FIRMWARE_VERSION    "${{ steps.version.outputs.version }}"/' firmware/src/config.h
+
+      - name: Build firmware
+        run: pio run -e wt32_sc01_plus
+        working-directory: firmware
+
+      - name: Build LittleFS image
+        run: pio run -e wt32_sc01_plus --target buildfs
+        working-directory: firmware
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p release
+          VERSION="${{ steps.version.outputs.version }}"
+          cp firmware/.pio/build/wt32_sc01_plus/firmware.bin "release/pitclaw-firmware-${VERSION}.bin"
+          cp firmware/.pio/build/wt32_sc01_plus/littlefs.bin "release/pitclaw-littlefs-${VERSION}.bin"
+
+          # Include STL files if they exist
+          if ls enclosure/stl/*.stl 1>/dev/null 2>&1; then
+            cp enclosure/stl/*.stl release/
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Pit Claw ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          prerelease: true
+          files: release/*
