@@ -102,4 +102,6 @@
 #define MDNS_HOSTNAME       "bbq"
 #define AP_SSID             "BBQ-Setup"
 #define AP_PASSWORD         "bbqsetup"
-#define FIRMWARE_VERSION    "0.1.0"
+#ifndef FIRMWARE_VERSION
+#define FIRMWARE_VERSION    "dev"
+#endif
