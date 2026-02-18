@@ -72,7 +72,9 @@ Step-by-step instructions for building the Pit Claw temperature controller carri
 
 ## Schematic
 
-See the full wiring schematic: [schematic.svg](schematic.svg)
+The full circuit schematic is in KiCad format: [`hardware/bbq-controller.kicad_sch`](../hardware/bbq-controller.kicad_sch)
+
+**To view/edit:** Open the `.kicad_pro` file in [KiCad](https://www.kicad.org/) (free, open source, industry standard EDA). You can export to PDF or SVG from KiCad via File > Export.
 
 The circuit has five functional sections:
 
