@@ -10,18 +10,14 @@
 Thumbs.db
 nul
 
-# Claude Code (track commands + shared settings, ignore local state)
+# Claude Code (track commands, ignore local state)
 .claude/*
 !.claude/commands/
-!.claude/settings.json
 
 # IDE
 *.swp
 *.swo
 *~
-
-# Simulator runtime artifacts
-simulator/
 
 # Build artifacts
 *.o
