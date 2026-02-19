@@ -107,6 +107,8 @@ After implementing, verify the test plan items from the spec:
 - Run any applicable build commands or tests listed in the spec's test plan
 - Confirm the changes match the requirements
 
+**Check off test plan items in the spec**: As you verify each test plan item, edit the spec file in the worktree to change `- [ ]` to `- [x]` for that item. The spec should reflect the actual verification status — only check off items you've confirmed pass. Leave items unchecked if they genuinely weren't verified.
+
 ## Step 9: Report and Offer to Ship
 
 Print a summary of what was implemented, then ask:
