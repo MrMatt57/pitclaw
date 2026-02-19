@@ -138,6 +138,101 @@ The circuit has five functional sections:
 
 ---
 
+## Perfboard Layout
+
+The carrier board is a **50x70mm perfboard** (2.54mm hole pitch). The layout below shows where each component goes on the **front** (component side) of the board. The grid uses column letters (A-S, left to right) and row numbers (1-27, top to bottom).
+
+### Component Placement Map (Front View)
+
+```
+            50mm (19 columns)
+     A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  P  Q  R  S
+     ┌──────────────────────────────────────────────────────────┐
+  1  │  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  │
+  2  │  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  │
+  3  │  . ┌──────────────┐ .  .  .  .  .  .  .  .  .  .  .  . │
+  4  │  . │  MP1584EN    │ .  .  .  .  .  .  .  .  .  .  .  . │  70mm
+  5  │  . │  buck conv   │ .  .  .  .  .  .  .  .  .  .  .  . │  (27
+  6  │  . │  U1          │ .  .  .  .  .  .  .  .  .  .  .  . │  rows)
+  7  │  . └──IN+ IN- OUT+ OUT-  .  .  .  .  .  .  .  .  .  . │
+  8  │  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  │
+  9  │  .  .  .  .  .  .  .  .  . ┌──────────────────┐  .  .  │
+ 10  │  .  .  .  .  .  .  .  .  . │  ADS1115 breakout│  .  .  │
+ 11  │  .  .  .  .  .  .  .  .  . │  U2 (socketed)   │  .  .  │
+ 12  │  .  .  .  .  .  .  .  .  . │  VDD GND SDA SCL │  .  .  │
+ 13  │  .  .  .  .  .  .  .  .  . │  A0  A1  A2  A3  │  .  .  │
+ 14  │  .  .  .  .  .  .  .  .  . └──────────────────┘  .  .  │
+ 15  │  .  .  .  .  .  .  .  .  .  R1   R2   R3  .  .  .  .  │
+ 16  │  .  .  .  .  .  .  .  .  .  │    │    │   .  .  .  .  │
+ 17  │  .  .  .  .  .  .  .  .  .  C1   C2   C3  .  .  .  .  │
+ 18  │  Q1 ┌──┐ .  .  .  .  .  .  .  .  .  .  .  . [BZ1]  . │
+ 19  │  G──│FET│──D  .  .  .  .  .  .  .  .  .  .  . buzzer . │
+ 20  │  │  └──┘  │  .  .  .  .  .  .  .  .  .  .  .  .  .  . │
+ 21  │  R4  S    │  .  .  .  .  .  .  .  .  .  .  .  .  .  . │
+ 22  │  │   │    │  .  .  .  .  .  .  .  .  .  .  .  .  .  . │
+ 23  │  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  │
+ 24  │  12V FAN  FAN SVO SVO SVO  .  .  PRB1 PRB1 PRB2 PRB2 PRB3│
+ 25  │  (+) (+)  (-) SIG VCC GND .  .  TIP  SLV  TIP  SLV  TIP │
+ 26  │  GND .    .   .   .   .   .  .  .    .    .    .    SLV │
+ 27  │  . ── WT32 8-pin ribbon cable pads ──  .  .  .  .  .  . │
+     └──────────────────────────────────────────────────────────┘
+          ▲ BOTTOM EDGE (faces rear shell panel-mount holes) ▲
+```
+
+### Component Reference
+
+| Grid Position | Component | Notes |
+|---------------|-----------|-------|
+| B3-G7 | U1 (MP1584EN) | Module pins: B7=IN+, D7=IN-, E7=OUT+, G7=OUT- |
+| J9-Q14 | U2 (ADS1115) | Socketed in female pin headers. Check your breakout's pinout! |
+| J15-J17 | R1 + C1 | Pit probe divider (connects to ADS1115 A0) |
+| L15-L17 | R2 + C2 | Meat 1 probe divider (connects to ADS1115 A1) |
+| N15-N17 | R3 + C3 | Meat 2 probe divider (connects to ADS1115 A2) |
+| A18-C22 | Q1 (IRLZ44N) | TO-220, A19=Gate, B18-B20=body, C19=Drain |
+| A21-A22 | R4 (10K) | Gate pulldown: Gate to GND |
+| P18-P19 | BZ1 (Buzzer) | (+) up toward GPIO14 pad, (-) down to GND |
+| A24-A26 | 12V + GND | Barrel jack wires solder here |
+| B24-C24 | Fan + / Fan - | Fan connector pads |
+| D24-F24 | Servo | Signal, VCC (5V), GND pads |
+| I24-S26 | Probe jacks | Tip and Sleeve wire pads for each jack |
+| A27-H27 | WT32 ribbon | 8-pin pads for ribbon cable to WT32-SC01 Plus |
+
+### Wiring on the Back (Solder Side)
+
+All connections are made on the **back of the perfboard** using short wire jumpers or solder bridges. Here are the key traces to run:
+
+**Power rails** (run these first):
+1. **GND bus** — horizontal trace along row 23, connecting: U1 OUT-, Q1 Source, R4 bottom, all cap bottoms (C1-C3), buzzer (-), all probe jack sleeves, J5 pin 8
+2. **12V trace** — from barrel jack pad (A24) to U1 IN+ (B7), and to fan (+) pad (B24)
+3. **5V trace** — from U1 OUT+ (E7) to servo VCC pad (E24), and to J5 pin 7
+4. **3.3V bus** — from J5 pin 6 to: top of R1 (J15), top of R2 (L15), top of R3 (N15), and ADS1115 VDD
+
+**Signal traces:**
+5. **Probe junctions** — bottom of R1/top of C1 → ADS1115 A0, and → Probe 1 tip pad. Same for R2→A1→Probe 2, R3→A2→Probe 3
+6. **I2C** — ADS1115 SDA → J5 pin 1 (GPIO10). ADS1115 SCL → J5 pin 2 (GPIO11)
+7. **Fan PWM** — J5 pin 3 (GPIO12) → Q1 Gate (A19). Also R4 from Gate to GND
+8. **Servo signal** — J5 pin 4 (GPIO13) → Servo signal pad (D24)
+9. **Buzzer signal** — J5 pin 5 (GPIO14) → Buzzer (+) pad (P18)
+10. **ADS1115 ADDR** — ADS1115 ADDR pin → GND bus (sets I2C address 0x48)
+
+> ![Photo placeholder](images/perfboard-layout-planning.jpg)
+> *Photo: Perfboard with components laid out before soldering (dry fit)*
+
+> ![Photo placeholder](images/perfboard-back-traces.jpg)
+> *Photo: Back of perfboard showing all solder traces and wire jumpers*
+
+### Tips for Perfboard Wiring
+
+- **Plan before soldering.** Lay out all components in their positions first (dry fit). Use the grid map above as reference.
+- **Solder power rails first.** GND bus → 12V → 5V → 3.3V. Test each rail before moving to signals.
+- **Use colored wire.** Red for power, black for GND, and distinct colors for signal traces (e.g., blue for I2C, green for PWM).
+- **Keep traces short.** Route wires on the back side along rows/columns. Avoid diagonal runs.
+- **Socket the ADS1115.** Use female pin headers so you can remove the breakout board for debugging or replacement.
+- **Check orientation.** MOSFET Q1 has Gate-Drain-Source left to right when facing the label. Verify your specific ADS1115 breakout's pinout — they vary between manufacturers.
+- **Test as you go.** After each phase, use a multimeter to verify connections match the wiring list above.
+
+---
+
 ## Assembly Instructions
 
 ### Overview
@@ -689,6 +784,8 @@ Quick reference for all connections between the carrier board and WT32-SC01 Plus
 
 As you build, take photos at these key moments. They'll be useful for others following this guide and for troubleshooting if something isn't working. Replace the placeholder images above with your actual build photos.
 
+- [ ] `perfboard-layout-planning.jpg` - Perfboard dry-fit with all components placed
+- [ ] `perfboard-back-traces.jpg` - Complete back of perfboard showing solder traces
 - [ ] `phase1-layout-planning.jpg` - Component placement marked on perfboard
 - [ ] `phase1-buck-converter-soldered.jpg` - MP1584EN installed
 - [ ] `phase1-power-rails.jpg` - Power rail traces on back of board
