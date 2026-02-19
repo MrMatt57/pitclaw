@@ -48,21 +48,21 @@ git push -u origin feature/{name}
 
 ## Step 4: Create PR
 
-Look for a spec file in `.specs/` that matches the branch name. Read it for context about the feature.
+Look for a spec file in `.specs/` that matches the branch name. Read it to extract:
+1. **Summary section** — use as the PR summary (convert to bullet points if not already)
+2. **Test Plan section** — copy directly into the PR body, preserving the checked/unchecked state from the spec
 
-The test plan checklist items should be **checked off** (`[x]`) — the implementation and verification was already done before `/ship` was called. Only leave items unchecked if they genuinely weren't verified.
+The test plan items should already be checked off (`[x]`) from the implementation step. Do not re-write or paraphrase them — use the spec's exact test plan items.
 
-Create the PR using the spec's summary and test plan:
+Create the PR using content pulled from the spec:
 
 ```bash
 gh pr create --title "Short descriptive title" --body "$(cat <<'EOF'
 ## Summary
-- {Bullet points from spec summary and what was implemented}
+{Bullet points derived from the spec's Summary section}
 
 ## Test plan
-- [x] Desktop tests pass (`pio test -e native`)
-- [x] Firmware builds (`pio run -e wt32_sc01_plus`)
-- [x] {Any feature-specific test steps from the spec — checked off}
+{Exact test plan checkboxes from the spec, preserving [x] / [ ] state}
 
 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
