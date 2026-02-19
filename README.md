@@ -4,7 +4,17 @@
 
 Open-source BBQ temperature monitor and controller. Uses an ESP32-S3 with a 3.5" touchscreen to maintain precise smoker temperature via PID-controlled fan and optional servo damper. Reads Thermoworks-compatible thermistor probes. Includes a web interface (PWA) for remote monitoring from any phone or computer on Wi-Fi. Touchscreen works fully offline.
 
-![Pit Claw Web UI](docs/media/pitclaw.png)
+### Touchscreen Dashboard
+
+Real-time temperature display on the 3.5" capacitive touchscreen. Works fully offline — no Wi-Fi required.
+
+![Pit Claw touchscreen dashboard](docs/media/pitclaw-device.png)
+
+### Web Interface
+
+Browser-based PWA with live temperature graph, predictive done-time curves, and full cook session control. Access from any device at `http://bbq.local`.
+
+![Pit Claw web UI with temperature history graph](docs/media/pitclaw.png)
 
 ## Features
 
