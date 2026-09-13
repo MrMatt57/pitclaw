@@ -37,6 +37,7 @@ BBQWebServer::BBQWebServer()
     , _onAlarm(nullptr)
     , _onSession(nullptr)
     , _onFanMode(nullptr)
+    , _onTempBackend(nullptr)
 {
 }
 
@@ -166,6 +167,13 @@ bbq_protocol::DataPayload BBQWebServer::buildDataPayload() {
     // Fan mode
     payload.fanMode = _config ? _config->getFanMode() : "fan_and_damper";
 
+    // Thermometer backend + Meater status
+    payload.thermometerBackend = _config ? _config->getThermometerBackend() : "wired";
+    payload.meaterStatus = nullptr;
+    if (_temp && _temp->getBackend() == ThermometerBackend::Meater) {
+        payload.meaterStatus = _temp->getMeaterClient().getStatusString();
+    }
+
     // Estimated done time
     payload.est = _estimatedTime;
 
@@ -260,6 +268,13 @@ void BBQWebServer::handleWebSocketMessage(uint8_t clientId, const char* data, si
         case bbq_protocol::CmdType::SET_FAN_MODE:
             if (_onFanMode) _onFanMode(cmd.fanMode);
             Serial.printf("[WS] Client %u set fan mode to %s\n", clientId, cmd.fanMode);
+            broadcastNow();
+            break;
+
+        case bbq_protocol::CmdType::SET_TEMP_BACKEND:
+            if (_onTempBackend) _onTempBackend(cmd.thermometerBackend);
+            Serial.printf("[WS] Client %u set thermometer backend to %s\n",
+                          clientId, cmd.thermometerBackend);
             broadcastNow();
             break;
 

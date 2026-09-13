@@ -41,6 +41,8 @@ size_t buildDataMessage(char* buf, size_t bufSize, const DataPayload& d) {
     doc["sp"] = (int)d.sp;
     doc["lid"] = d.lid;
     if (d.fanMode) doc["fanMode"] = d.fanMode;
+    if (d.thermometerBackend) doc["thermometerBackend"] = d.thermometerBackend;
+    if (d.meaterStatus) doc["meaterStatus"] = d.meaterStatus;
 
     // Meat targets: 0 → null
     if (d.meat1Target > 0)  doc["meat1Target"] = (int)d.meat1Target;
@@ -231,7 +233,12 @@ ParsedCommand parseCommand(const char* data, size_t len) {
     }
     else if (strcmp(type, "config") == 0) {
         const char* fm = doc["fanMode"] | "";
-        if (fm[0] != '\0') {
+        const char* tb = doc["thermometerBackend"] | "";
+        if (tb[0] != '\0') {
+            cmd.type = CmdType::SET_TEMP_BACKEND;
+            strncpy(cmd.thermometerBackend, tb, sizeof(cmd.thermometerBackend) - 1);
+            cmd.thermometerBackend[sizeof(cmd.thermometerBackend) - 1] = '\0';
+        } else if (fm[0] != '\0') {
             cmd.type = CmdType::SET_FAN_MODE;
             strncpy(cmd.fanMode, fm, sizeof(cmd.fanMode) - 1);
             cmd.fanMode[sizeof(cmd.fanMode) - 1] = '\0';

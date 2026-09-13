@@ -62,6 +62,11 @@
 #define TEMP_AVG_SAMPLES         4      // Average 4 readings
 #define TEMP_EMA_ALPHA           0.2    // EMA smoothing factor (lower = smoother, less derivative noise)
 
+// --- Meater BLE ---
+#define MEATER_STALE_MS            30000  // Mark disconnected if no GATT data for 30s
+#define MEATER_SCAN_MS             5000   // Active scan window
+#define MEATER_RECONNECT_BASE_MS   3000   // Initial reconnect backoff
+
 // --- Lid-Open Detection ---
 #define LID_OPEN_DROP_PCT   6    // 6% drop below setpoint triggers lid-open
 #define LID_OPEN_RECOVER_PCT 2   // Recovered when within 2% of setpoint

@@ -113,6 +113,19 @@ void ConfigManager::setUnits(const char* units) {
     _config.units[sizeof(_config.units) - 1] = '\0';
 }
 
+bool ConfigManager::isMeaterBackend() const {
+    return strcmp(_config.thermometerBackend, "meater") == 0;
+}
+
+void ConfigManager::setThermometerBackend(const char* backend) {
+    if (backend && strcmp(backend, "meater") == 0) {
+        strncpy(_config.thermometerBackend, "meater", sizeof(_config.thermometerBackend) - 1);
+    } else {
+        strncpy(_config.thermometerBackend, "wired", sizeof(_config.thermometerBackend) - 1);
+    }
+    _config.thermometerBackend[sizeof(_config.thermometerBackend) - 1] = '\0';
+}
+
 void ConfigManager::setPidTunings(float kp, float ki, float kd) {
     _config.pid.kp = kp;
     _config.pid.ki = ki;
@@ -181,6 +194,9 @@ void ConfigManager::applyDefaults() {
     // Units
     strncpy(_config.units, "F", sizeof(_config.units));
 
+    // Thermometer backend (wired ADS1115 by default)
+    strncpy(_config.thermometerBackend, "wired", sizeof(_config.thermometerBackend));
+
     // PID
     _config.pid.kp = PID_KP;
     _config.pid.ki = PID_KI;
@@ -220,6 +236,9 @@ void ConfigManager::toJson(JsonDocument& doc) const {
 
     // Units
     doc["units"] = _config.units;
+
+    // Thermometer backend
+    doc["thermometerBackend"] = _config.thermometerBackend;
 
     // PID
     JsonObject pid = doc["pid"].to<JsonObject>();
@@ -272,6 +291,11 @@ void ConfigManager::fromJson(const JsonDocument& doc) {
     // Units
     if (doc["units"].is<const char*>()) {
         strncpy(_config.units, doc["units"].as<const char*>(), sizeof(_config.units) - 1);
+    }
+
+    // Thermometer backend
+    if (doc["thermometerBackend"].is<const char*>()) {
+        setThermometerBackend(doc["thermometerBackend"].as<const char*>());
     }
 
     // PID

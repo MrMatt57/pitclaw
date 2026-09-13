@@ -86,7 +86,9 @@ firmware/
     wifi_manager.h/.cpp         # WiFiManager captive portal, mDNS, auto-reconnect
     ota_manager.h/.cpp          # Web-based OTA firmware update endpoint
     pid_controller.h/.cpp       # PID wrapper (QuickPID + lid-open, startup, split-range)
-    temp_manager.h/.cpp         # ADS1115 reading, Steinhart-Hart, EMA filtering
+    temp_manager.h/.cpp         # ADS1115 / Meater BLE backends, Steinhart-Hart, EMA
+    meater_client.h/.cpp        # Meater BLE scan/connect/reconnect (NimBLE)
+    meater_protocol.h/.cpp      # Meater tip/ambient decode (classic + Pro/2)
     temp_predictor.h/.cpp       # Rolling linear regression for done-time prediction
     fan_controller.h/.cpp       # PWM output with kick-start, long-pulse, min-speed
     servo_controller.h/.cpp     # Damper servo control
@@ -120,7 +122,7 @@ firmware/
 
 **PID Controller** (`pid_controller.h/.cpp`) — wraps QuickPID with BBQ-specific features: proportional-on-measurement, derivative-on-measurement, integral anti-windup conditioning. Includes lid-open detection (6% drop below setpoint) and startup mode.
 
-**Temperature Manager** (`temp_manager.h/.cpp`) — reads ADS1115 ADC via I2C, converts raw ADC counts to temperature using Steinhart-Hart equation, applies EMA (exponential moving average) filtering, and supports per-probe calibration offsets.
+**Temperature Manager** (`temp_manager.h/.cpp`) — config-selectable backend: **wired** (ADS1115 + Steinhart-Hart, default) or **meater** (local BLE tip/ambient → pit/meat; see [meater.md](meater.md)). Full swap only — never mixes wired pit with Meater meat. Applies EMA filtering and per-probe calibration offsets.
 
 **Fan + Damper Split-Range** (`split_range.h`) — the PID produces a single 0-100% output mapped to both actuators:
 - Damper: linearly maps full PID range (0% = closed, 100% = open)
@@ -139,6 +141,7 @@ All user settings stored in `config.json` on LittleFS. Survives reboots and firm
 {
   "wifi": { "ssid": "", "password": "" },
   "units": "F",
+  "thermometerBackend": "wired",
   "pid": { "p": 4.0, "i": 0.02, "d": 5.0 },
   "fan": { "mode": "fan_and_damper", "minSpeed": 15, "fanOnThreshold": 30 },
   "probes": {

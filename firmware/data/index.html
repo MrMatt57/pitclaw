@@ -254,6 +254,15 @@
       </div>
       <div class="settings-divider"></div>
       <div class="settings-group">
+        <div class="settings-label">Thermometer</div>
+        <div class="fan-mode-buttons">
+          <button class="btn btn-fan-mode active" id="btnTempWired" data-backend="wired">Wired</button>
+          <button class="btn btn-fan-mode" id="btnTempMeater" data-backend="meater">Meater BLE</button>
+        </div>
+        <div class="settings-hint" id="meaterStatusHint" style="margin-top:6px;font-size:12px;opacity:0.7;"></div>
+      </div>
+      <div class="settings-divider"></div>
+      <div class="settings-group">
         <div class="settings-label">Session</div>
         <div class="session-buttons">
           <button class="btn btn-secondary" id="btnDownloadCSV">Download CSV</button>

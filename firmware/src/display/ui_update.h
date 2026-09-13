@@ -57,7 +57,9 @@ void ui_graph_add_point(float pit, float meat1, float meat2, float setpoint,
 void ui_graph_clear();
 
 // Update settings screen state to reflect current values.
-void ui_update_settings_state(bool isFahrenheit, const char* fanMode);
+// tempBackend may be nullptr to leave thermometer buttons unchanged.
+void ui_update_settings_state(bool isFahrenheit, const char* fanMode,
+                              const char* tempBackend = nullptr);
 
 // Set the display units (affects temperature labels like °F / °C).
 void ui_set_units(bool fahrenheit);

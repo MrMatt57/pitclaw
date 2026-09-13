@@ -103,6 +103,8 @@ lv_obj_t* btn_units_c       = nullptr;
 lv_obj_t* btn_fan_only      = nullptr;
 lv_obj_t* btn_fan_damper    = nullptr;
 lv_obj_t* btn_damper_pri    = nullptr;
+lv_obj_t* btn_temp_wired    = nullptr;
+lv_obj_t* btn_temp_meater   = nullptr;
 
 // Settings — Wi-Fi info widgets
 lv_obj_t* lbl_wifi_status   = nullptr;
@@ -146,6 +148,7 @@ static UiMeatTargetCb  cb_meat_target = nullptr;
 static UiAlarmAckCb    cb_alarm_ack   = nullptr;
 static UiUnitsCb       cb_units       = nullptr;
 static UiFanModeCb     cb_fan_mode    = nullptr;
+static UiTempBackendCb cb_temp_backend = nullptr;
 static UiNewSessionCb  cb_new_session = nullptr;
 static UiFactoryResetCb cb_factory_reset = nullptr;
 static UiWifiActionCb   cb_wifi_action  = nullptr;
@@ -166,6 +169,10 @@ void ui_set_settings_callbacks(UiUnitsCb units, UiFanModeCb fan,
 
 void ui_set_wifi_callback(UiWifiActionCb cb) {
     cb_wifi_action = cb;
+}
+
+void ui_set_temp_backend_callback(UiTempBackendCb cb) {
+    cb_temp_backend = cb;
 }
 
 // --------------------------------------------------------------------------
@@ -976,6 +983,21 @@ static void damper_pri_click(lv_event_t* e) {
     if (btn_damper_pri)  lv_obj_set_style_bg_color(btn_damper_pri, COLOR_ORANGE, 0);
 }
 
+
+static void temp_wired_click(lv_event_t* e) {
+    (void)e;
+    if (cb_temp_backend) cb_temp_backend("wired");
+    if (btn_temp_wired)  lv_obj_set_style_bg_color(btn_temp_wired, COLOR_ORANGE, 0);
+    if (btn_temp_meater) lv_obj_set_style_bg_color(btn_temp_meater, COLOR_BAR_BG, 0);
+}
+
+static void temp_meater_click(lv_event_t* e) {
+    (void)e;
+    if (cb_temp_backend) cb_temp_backend("meater");
+    if (btn_temp_wired)  lv_obj_set_style_bg_color(btn_temp_wired, COLOR_BAR_BG, 0);
+    if (btn_temp_meater) lv_obj_set_style_bg_color(btn_temp_meater, COLOR_ORANGE, 0);
+}
+
 static void new_session_click(lv_event_t* e) {
     (void)e;
     show_confirm("New Session",
@@ -1109,6 +1131,42 @@ static void create_settings_screen() {
     lv_obj_add_event_cb(btn_damper_pri, damper_pri_click, LV_EVENT_CLICKED, nullptr);
     lbl = lv_label_create(btn_damper_pri);
     lv_label_set_text(lbl, "Damper");
+    lv_obj_set_style_text_color(lbl, COLOR_TEXT, 0);
+    lv_obj_center(lbl);
+
+
+    // --- Thermometer Backend ---
+    row = lv_obj_create(content);
+    lv_obj_set_size(row, LV_PCT(100), 44);
+    lv_obj_set_style_bg_color(row, COLOR_CARD_BG, 0);
+    lv_obj_set_style_border_width(row, 0, 0);
+    lv_obj_set_style_radius(row, 6, 0);
+    lv_obj_set_style_pad_all(row, 6, 0);
+
+    lbl = lv_label_create(row);
+    lv_label_set_text(lbl, "Probes");
+    lv_obj_set_style_text_color(lbl, COLOR_TEXT, 0);
+    lv_obj_align(lbl, LV_ALIGN_LEFT_MID, 4, 0);
+
+    btn_temp_wired = lv_btn_create(row);
+    lv_obj_set_size(btn_temp_wired, 80, 30);
+    lv_obj_align(btn_temp_wired, LV_ALIGN_RIGHT_MID, -90, 0);
+    lv_obj_set_style_bg_color(btn_temp_wired, COLOR_ORANGE, 0);
+    lv_obj_set_style_radius(btn_temp_wired, 4, 0);
+    lv_obj_add_event_cb(btn_temp_wired, temp_wired_click, LV_EVENT_CLICKED, nullptr);
+    lbl = lv_label_create(btn_temp_wired);
+    lv_label_set_text(lbl, "Wired");
+    lv_obj_set_style_text_color(lbl, COLOR_TEXT, 0);
+    lv_obj_center(lbl);
+
+    btn_temp_meater = lv_btn_create(row);
+    lv_obj_set_size(btn_temp_meater, 80, 30);
+    lv_obj_align(btn_temp_meater, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_set_style_bg_color(btn_temp_meater, COLOR_BAR_BG, 0);
+    lv_obj_set_style_radius(btn_temp_meater, 4, 0);
+    lv_obj_add_event_cb(btn_temp_meater, temp_meater_click, LV_EVENT_CLICKED, nullptr);
+    lbl = lv_label_create(btn_temp_meater);
+    lv_label_set_text(lbl, "Meater");
     lv_obj_set_style_text_color(lbl, COLOR_TEXT, 0);
     lv_obj_center(lbl);
 
@@ -1292,4 +1350,5 @@ void ui_handler() {}
 void ui_set_callbacks(UiSetpointCb, UiMeatTargetCb, UiAlarmAckCb) {}
 void ui_set_settings_callbacks(UiUnitsCb, UiFanModeCb, UiNewSessionCb, UiFactoryResetCb) {}
 void ui_set_wifi_callback(UiWifiActionCb) {}
+void ui_set_temp_backend_callback(UiTempBackendCb) {}
 #endif

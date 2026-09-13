@@ -60,6 +60,7 @@ struct WifiSettings {
 struct AppConfig {
     WifiSettings    wifi;
     char            units[4];     // "F" or "C"
+    char            thermometerBackend[12];  // "wired" (default) or "meater"
     PidSettings     pid;
     FanSettings     fan;
     ProbeSettings   probes[3];    // pit, meat1, meat2
@@ -101,6 +102,11 @@ public:
     const char* getUnits() const { return _config.units; }
     bool isFahrenheit() const { return _config.units[0] == 'F'; }
     void setUnits(const char* units);
+
+    // --- Thermometer backend ---
+    const char* getThermometerBackend() const { return _config.thermometerBackend; }
+    bool isMeaterBackend() const;
+    void setThermometerBackend(const char* backend);
 
     // --- PID ---
     float getPidKp() const { return _config.pid.kp; }

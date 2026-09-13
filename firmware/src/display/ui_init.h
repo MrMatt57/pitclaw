@@ -20,6 +20,7 @@ typedef void (*UiMeatTargetCb)(uint8_t probe, float target);  // probe 1 or 2, t
 typedef void (*UiAlarmAckCb)();
 typedef void (*UiUnitsCb)(bool isFahrenheit);
 typedef void (*UiFanModeCb)(const char* mode);
+typedef void (*UiTempBackendCb)(const char* backend);  // "wired" or "meater"
 typedef void (*UiNewSessionCb)();
 typedef void (*UiFactoryResetCb)();
 typedef void (*UiWifiActionCb)(const char* action);  // "disconnect", "reconnect", "setup_ap"
@@ -49,3 +50,6 @@ void ui_set_settings_callbacks(UiUnitsCb units, UiFanModeCb fan,
 
 // Set callback for Wi-Fi action buttons (Disconnect/Reconnect/Setup Mode)
 void ui_set_wifi_callback(UiWifiActionCb cb);
+
+// Set callback for thermometer backend selection (wired / meater)
+void ui_set_temp_backend_callback(UiTempBackendCb cb);

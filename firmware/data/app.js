@@ -34,6 +34,7 @@
   var currentUnits = 'F';        // 'F' or 'C' — display only
   var currentTimeFormat = '12h'; // '12h' or '24h'
   var currentFanMode = 'fan_and_damper'; // 'fan_only', 'fan_and_damper', 'damper_primary'
+  var currentTempBackend = 'wired'; // 'wired' or 'meater'
   var currentTheme = 'dark'; // 'dark' or 'light' — synced from firmware
 
   var cookTimerStart = null;  // server timestamp (seconds) when cook started
@@ -334,6 +335,28 @@
     var legDamperItem = dom.legDamper.closest('.legend-item');
     if (legFanItem) legFanItem.style.display = mode === 'damper_primary' ? 'none' : '';
     if (legDamperItem) legDamperItem.style.display = mode === 'fan_only' ? 'none' : '';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Thermometer Backend
+  // ---------------------------------------------------------------------------
+  function applyTempBackend(backend, meaterStatus) {
+    currentTempBackend = backend === 'meater' ? 'meater' : 'wired';
+    if (dom.btnTempWired) {
+      dom.btnTempWired.classList.toggle('active', currentTempBackend === 'wired');
+    }
+    if (dom.btnTempMeater) {
+      dom.btnTempMeater.classList.toggle('active', currentTempBackend === 'meater');
+    }
+    if (dom.meaterStatusHint) {
+      if (currentTempBackend === 'meater') {
+        var st = meaterStatus || 'scanning';
+        dom.meaterStatusHint.textContent = 'Meater: ' + st +
+          ' — ambient→pit, tip→meat1. Close the Meater app while connected.';
+      } else {
+        dom.meaterStatusHint.textContent = '';
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1320,6 +1343,16 @@
         var mode = this.getAttribute('data-mode');
         applyFanMode(mode);
         wsSend({ type: 'config', fanMode: mode });
+      });
+    });
+
+    var tempBackendButtons = [dom.btnTempWired, dom.btnTempMeater];
+    tempBackendButtons.forEach(function (btn) {
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var backend = this.getAttribute('data-backend');
+        applyTempBackend(backend);
+        wsSend({ type: 'config', thermometerBackend: backend });
       });
     });
   }

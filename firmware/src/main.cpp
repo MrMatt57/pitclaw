@@ -94,7 +94,17 @@ static void ws_onAlarm(const char* probe, float target) {
 
 static void ws_onFanMode(const char* mode) {
     configManager.setFanMode(mode);
-    ui_update_settings_state(configManager.isFahrenheit(), configManager.getFanMode());
+    configManager.save();
+    ui_update_settings_state(configManager.isFahrenheit(), configManager.getFanMode(),
+                             configManager.getThermometerBackend());
+}
+
+static void ws_onTempBackend(const char* backend) {
+    configManager.setThermometerBackend(backend);
+    configManager.save();
+    tempManager.setBackend(TempManager::backendFromString(backend));
+    ui_update_settings_state(configManager.isFahrenheit(), configManager.getFanMode(),
+                             configManager.getThermometerBackend());
 }
 
 static void ws_onSession(const char* action, const char* format) {
@@ -127,11 +137,19 @@ static void ui_cb_alarm_ack() {
 
 static void ui_cb_units(bool isFahrenheit) {
     configManager.setUnits(isFahrenheit ? "F" : "C");
+    configManager.save();
     tempManager.setUseFahrenheit(isFahrenheit);
 }
 
 static void ui_cb_fan_mode(const char* mode) {
     configManager.setFanMode(mode);
+    configManager.save();
+}
+
+static void ui_cb_temp_backend(const char* backend) {
+    configManager.setThermometerBackend(backend);
+    configManager.save();
+    tempManager.setBackend(TempManager::backendFromString(backend));
 }
 
 static void ui_cb_new_session() {
@@ -224,6 +242,9 @@ void setup() {
     }
     tempManager.setUseFahrenheit(configManager.isFahrenheit());
 
+    // Select thermometer backend (wired default; Meater starts BLE)
+    tempManager.setBackend(TempManager::backendFromString(configManager.getThermometerBackend()));
+
     // 5. Initialize PID controller with saved tunings
     pidController.begin(cfg.pid.kp, cfg.pid.ki, cfg.pid.kd);
 
@@ -252,6 +273,7 @@ void setup() {
     webServer.onAlarm(ws_onAlarm);
     webServer.onSession(ws_onSession);
     webServer.onFanMode(ws_onFanMode);
+    webServer.onTempBackend(ws_onTempBackend);
 
     // 12. Initialize OTA updates (needs the AsyncWebServer to register /update route)
     otaManager.begin(webServer.getAsyncServer());
@@ -264,13 +286,15 @@ void setup() {
     // 14. Wire up dashboard callbacks and set initial state
     ui_set_callbacks(ui_cb_setpoint, ui_cb_meat_target, ui_cb_alarm_ack);
     ui_set_settings_callbacks(ui_cb_units, ui_cb_fan_mode, ui_cb_new_session, ui_cb_factory_reset);
+    ui_set_temp_backend_callback(ui_cb_temp_backend);
     ui_set_wifi_callback(ui_cb_wifi_action);
 
     // Set initial display state
     ui_update_setpoint(g_setpoint);
     ui_update_meat1_target(alarmManager.getMeat1Target());
     ui_update_meat2_target(alarmManager.getMeat2Target());
-    ui_update_settings_state(configManager.isFahrenheit(), configManager.getFanMode());
+    ui_update_settings_state(configManager.isFahrenheit(), configManager.getFanMode(),
+                             configManager.getThermometerBackend());
 
     // Pre-populate graph from recovered session data
     {

@@ -245,7 +245,7 @@ static void web_on_fan_mode(const char* mode) {
     strncpy(g_fan_mode, mode, sizeof(g_fan_mode) - 1);
     g_fan_mode[sizeof(g_fan_mode) - 1] = '\0';
     if (g_model) g_model->setFanMode(mode);
-    ui_update_settings_state(g_is_fahrenheit, g_fan_mode);
+    ui_update_settings_state(g_is_fahrenheit, g_fan_mode, "wired");
     printf("[WEB] Fan mode changed to %s\n", mode);
 }
 
@@ -343,6 +343,7 @@ int main(int argc, char* argv[]) {
     // Wire up dashboard callbacks
     ui_set_callbacks(on_setpoint, on_meat_target, on_alarm_ack);
     ui_set_settings_callbacks(on_units, on_fan_mode, on_new_session, on_factory_reset);
+    ui_set_temp_backend_callback(nullptr);
     ui_set_wifi_callback(on_wifi_action);
 
     // Initialize thermal model
@@ -359,7 +360,7 @@ int main(int argc, char* argv[]) {
     ui_update_setpoint(model.setpoint);
     ui_update_meat1_target(g_meat1_target);
     ui_update_meat2_target(g_meat2_target);
-    ui_update_settings_state(true, "fan_and_damper");
+    ui_update_settings_state(true, "fan_and_damper", "wired");
 
     // Initialize web server for browser-based UI
     SimWebServer webServer;
@@ -506,6 +507,8 @@ int main(int argc, char* argv[]) {
                     payload.meat2Target = g_meat2_target;
                     payload.est   = 0;
                     payload.fanMode = g_fan_mode;
+                    payload.thermometerBackend = "wired";
+                    payload.meaterStatus = nullptr;
                     payload.errorCount = 0;
                     webServer.broadcastData(payload);
 

@@ -19,6 +19,7 @@ Browser-based PWA with live temperature graph, predictive done-time curves, and 
 ## Features
 
 - **3 probe inputs**: 1 pit (ambient) + 2 meat probes (Thermoworks Pro-Series compatible, 2.5mm jack)
+- **Meater BLE option**: config-selectable full swap to Meater/Meater+ wireless probes (local BLE, no cloud)
 - **PID temperature control**: Fan + optional damper hold pit temperature steady (±5°F typical)
 - **3.5" capacitive touchscreen**: Real-time dashboard — works fully without Wi-Fi
 - **Web UI (PWA)**: Install to home screen, real-time graph, set points, alarms, session export
@@ -62,6 +63,12 @@ Any Thermoworks Pro-Series probe with 2.5mm mono jack works:
 - [TX-1001X-OP](https://www.thermoworks.com/tx-1001x-op/) — Cooking/meat probe (~$21)
 
 Compatible alternatives: Maverick ET-72/73 replacement probes (different Steinhart-Hart coefficients), Inkbird, FireBoard probes.
+
+### Meater Bluetooth (optional)
+
+As an alternative to wired probes, Pit Claw can read a **Meater / Meater+** over Bluetooth LE. This is a **full swap**: when Meater mode is selected, all temperatures come from the Meater (ambient→pit, tip→meat1). Wired ADC probes are unused in that mode.
+
+Enable via **Settings → Thermometer → Meater BLE** on the touchscreen or web UI. See [docs/meater.md](docs/meater.md) for setup, protocol sources, and caveats (close the Meater app while connected; metal smokers reduce BLE range).
 
 ### 3D Printed Parts
 

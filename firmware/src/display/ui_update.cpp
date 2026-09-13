@@ -57,6 +57,8 @@ extern lv_obj_t* btn_units_c;
 extern lv_obj_t* btn_fan_only;
 extern lv_obj_t* btn_fan_damper;
 extern lv_obj_t* btn_damper_pri;
+extern lv_obj_t* btn_temp_wired;
+extern lv_obj_t* btn_temp_meater;
 
 // Settings — Wi-Fi info
 extern lv_obj_t* lbl_wifi_status;
@@ -469,7 +471,8 @@ void ui_update_wifi_info(const WifiInfo& info) {
     }
 }
 
-void ui_update_settings_state(bool isFahrenheit, const char* fanMode) {
+void ui_update_settings_state(bool isFahrenheit, const char* fanMode,
+                              const char* tempBackend) {
     if (btn_units_f && btn_units_c) {
         lv_obj_set_style_bg_color(btn_units_f, isFahrenheit ? COLOR_ORANGE : COLOR_BAR_BG, 0);
         lv_obj_set_style_bg_color(btn_units_c, isFahrenheit ? COLOR_BAR_BG : COLOR_ORANGE, 0);
@@ -487,6 +490,12 @@ void ui_update_settings_state(bool isFahrenheit, const char* fanMode) {
         } else if (strcmp(fanMode, "damper_primary") == 0) {
             lv_obj_set_style_bg_color(btn_damper_pri, COLOR_ORANGE, 0);
         }
+    }
+
+    if (btn_temp_wired && btn_temp_meater && tempBackend) {
+        bool meater = (strcmp(tempBackend, "meater") == 0);
+        lv_obj_set_style_bg_color(btn_temp_wired, meater ? COLOR_BAR_BG : COLOR_ORANGE, 0);
+        lv_obj_set_style_bg_color(btn_temp_meater, meater ? COLOR_ORANGE : COLOR_BAR_BG, 0);
     }
 }
 
@@ -506,6 +515,6 @@ void ui_update_wifi_info(const WifiInfo&) {}
 void ui_graph_init() {}
 void ui_graph_add_point(float, float, float, float, bool, bool, bool) {}
 void ui_graph_clear() {}
-void ui_update_settings_state(bool, const char*) {}
+void ui_update_settings_state(bool, const char*, const char*) {}
 void ui_set_units(bool) {}
 #endif

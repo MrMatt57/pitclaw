@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "units.h"
+#include "meater_client.h"
 #include <stdint.h>
 #include <math.h>
 
@@ -23,8 +24,14 @@ enum ProbeIndex : uint8_t {
 // Probe status
 enum class ProbeStatus : uint8_t {
     OK,
-    OPEN_CIRCUIT,    // ADC reads very high (probe disconnected)
-    SHORT_CIRCUIT    // ADC reads very low (probe shorted)
+    OPEN_CIRCUIT,    // ADC open / Meater disconnected
+    SHORT_CIRCUIT    // ADC short (wired only)
+};
+
+// Thermometer backend selection (full swap — never mix wired pit with Meater meat)
+enum class ThermometerBackend : uint8_t {
+    Wired = 0,   // ADS1115 thermistors (default)
+    Meater = 1   // Meater BLE tip/ambient
 };
 
 // Per-probe calibration and Steinhart-Hart coefficients
@@ -62,7 +69,7 @@ public:
     // Probe health status
     ProbeStatus getStatus(uint8_t probe) const;
 
-    // Raw ADC value (useful for diagnostics)
+    // Raw ADC value (useful for diagnostics; 0 in Meater mode)
     int16_t getRawADC(uint8_t probe) const;
 
     // Set EMA alpha (smoothing factor, 0-1, higher = less smoothing)
@@ -77,10 +84,24 @@ public:
     // Set whether to return temperatures in Fahrenheit
     void setUseFahrenheit(bool useF);
 
+    // Thermometer backend (wired vs meater). Switching starts/stops BLE.
+    void setBackend(ThermometerBackend backend);
+    ThermometerBackend getBackend() const { return _backend; }
+    static ThermometerBackend backendFromString(const char* s);
+    static const char* backendToString(ThermometerBackend b);
+
+    // Access Meater client (status / battery for UI)
+    MeaterClient& getMeaterClient() { return _meater; }
+    const MeaterClient& getMeaterClient() const { return _meater; }
+
     // Convert Celsius to Fahrenheit (delegates to shared units.h)
     static float cToF(float tempC) { return celsiusToFahrenheit(tempC); }
 
 private:
+    void updateWired();
+    void updateMeater();
+    void applyReading(uint8_t probe, float tempC, bool connected);
+
     // Convert raw ADC value to resistance using voltage divider formula
     float adcToResistance(int16_t raw) const;
 
@@ -90,6 +111,10 @@ private:
 #ifndef NATIVE_BUILD
     Adafruit_ADS1115 _ads;
 #endif
+
+    ThermometerBackend _backend;
+    MeaterClient       _meater;
+    bool               _adsOk;
 
     // Per-probe state
     int16_t     _rawADC[NUM_PROBES];

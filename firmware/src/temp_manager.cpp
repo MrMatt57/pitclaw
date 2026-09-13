@@ -1,4 +1,5 @@
 #include "temp_manager.h"
+#include <string.h>
 
 #ifndef NATIVE_BUILD
 #include <Arduino.h>
@@ -12,7 +13,9 @@ const uint8_t TempManager::_adcChannels[NUM_PROBES] = {
 };
 
 TempManager::TempManager()
-    : _emaAlpha(TEMP_EMA_ALPHA)
+    : _backend(ThermometerBackend::Wired)
+    , _adsOk(false)
+    , _emaAlpha(TEMP_EMA_ALPHA)
     , _useFahrenheit(true)
     , _lastSampleMs(0)
 {
@@ -21,8 +24,16 @@ TempManager::TempManager()
         _filteredTempC[i] = 0.0f;
         _status[i] = ProbeStatus::OPEN_CIRCUIT;
         _firstReading[i] = true;
-        // ProbeConfig default-initialized with THERM_A/B/C and offset 0
     }
+}
+
+ThermometerBackend TempManager::backendFromString(const char* s) {
+    if (s && strcmp(s, "meater") == 0) return ThermometerBackend::Meater;
+    return ThermometerBackend::Wired;
+}
+
+const char* TempManager::backendToString(ThermometerBackend b) {
+    return (b == ThermometerBackend::Meater) ? "meater" : "wired";
 }
 
 bool TempManager::begin() {
@@ -31,20 +42,111 @@ bool TempManager::begin() {
 
     if (!_ads.begin(ADS1115_ADDR, &Wire)) {
         Serial.println("[TEMP] ADS1115 not found at 0x48!");
-        return false;
+        _adsOk = false;
+        // Still return true — Meater-only setups may have no ADS fitted
+    } else {
+        _ads.setGain(GAIN_ONE);
+        _adsOk = true;
+        Serial.println("[TEMP] ADS1115 initialized OK.");
     }
-
-    // Set gain to GAIN_ONE (+/- 4.096V range)
-    _ads.setGain(GAIN_ONE);
-
-    Serial.println("[TEMP] ADS1115 initialized OK.");
+#else
+    _adsOk = true;
 #endif
     _lastSampleMs = 0;
+
+    // If config already selected Meater, start BLE now
+    if (_backend == ThermometerBackend::Meater) {
+        _meater.begin();
+    }
     return true;
 }
 
-void TempManager::update() {
+void TempManager::setBackend(ThermometerBackend backend) {
+    if (_backend == backend) return;
+
 #ifndef NATIVE_BUILD
+    Serial.printf("[TEMP] Switching thermometer backend to %s\n",
+                  backendToString(backend));
+#endif
+
+    if (_backend == ThermometerBackend::Meater) {
+        _meater.end();
+    }
+
+    _backend = backend;
+
+    // Reset EMA / status so we don't bleed stale values across backends
+    for (uint8_t i = 0; i < NUM_PROBES; i++) {
+        _status[i] = ProbeStatus::OPEN_CIRCUIT;
+        _firstReading[i] = true;
+        _filteredTempC[i] = 0.0f;
+        _rawADC[i] = 0;
+    }
+
+    if (_backend == ThermometerBackend::Meater) {
+        _meater.begin();
+    }
+}
+
+void TempManager::update() {
+    if (_backend == ThermometerBackend::Meater) {
+        updateMeater();
+    } else {
+        updateWired();
+    }
+}
+
+void TempManager::updateMeater() {
+    _meater.update();
+
+#ifndef NATIVE_BUILD
+    unsigned long now = millis();
+    if (now - _lastSampleMs < TEMP_SAMPLE_INTERVAL_MS) {
+        return;
+    }
+    _lastSampleMs = now;
+#endif
+
+    applyReading(PROBE_PIT,   _meater.getPitTempC(),   _meater.hasPit());
+    applyReading(PROBE_MEAT1, _meater.getMeat1TempC(), _meater.hasMeat1());
+    applyReading(PROBE_MEAT2, _meater.getMeat2TempC(), _meater.hasMeat2());
+
+    // Raw ADC unused in Meater mode
+    for (uint8_t i = 0; i < NUM_PROBES; i++) {
+        _rawADC[i] = 0;
+    }
+}
+
+void TempManager::applyReading(uint8_t probe, float tempC, bool connected) {
+    if (probe >= NUM_PROBES) return;
+
+    if (!connected) {
+        _status[probe] = ProbeStatus::OPEN_CIRCUIT;
+        _firstReading[probe] = true;
+        return;
+    }
+
+    // Apply calibration offset (shared with wired path)
+    tempC += _probeConfig[probe].offset;
+
+    if (_firstReading[probe]) {
+        _filteredTempC[probe] = tempC;
+        _firstReading[probe] = false;
+    } else {
+        _filteredTempC[probe] = _emaAlpha * tempC + (1.0f - _emaAlpha) * _filteredTempC[probe];
+    }
+    _status[probe] = ProbeStatus::OK;
+}
+
+void TempManager::updateWired() {
+#ifndef NATIVE_BUILD
+    if (!_adsOk) {
+        for (uint8_t i = 0; i < NUM_PROBES; i++) {
+            _status[i] = ProbeStatus::OPEN_CIRCUIT;
+        }
+        return;
+    }
+
     unsigned long now = millis();
     if (now - _lastSampleMs < TEMP_SAMPLE_INTERVAL_MS) {
         return;  // Not time to sample yet
@@ -79,18 +181,7 @@ void TempManager::update() {
         // Convert resistance to temperature in Celsius
         float tempC = resistanceToTempC(resistance, _probeConfig[i]);
 
-        // Apply calibration offset
-        tempC += _probeConfig[i].offset;
-
-        // Apply EMA filter
-        if (_firstReading[i]) {
-            _filteredTempC[i] = tempC;
-            _firstReading[i] = false;
-        } else {
-            _filteredTempC[i] = _emaAlpha * tempC + (1.0f - _emaAlpha) * _filteredTempC[i];
-        }
-
-        _status[i] = ProbeStatus::OK;
+        applyReading(i, tempC, true);
     }
 #endif
 }

@@ -15,6 +15,8 @@ struct DataPayload {
     float meat1Target, meat2Target; // 0 = not set
     uint32_t est;                   // 0 = not available
     const char* fanMode;            // "fan_only", "fan_and_damper", "damper_primary"
+    const char* thermometerBackend; // "wired" or "meater"
+    const char* meaterStatus;       // Meater BLE status string (or nullptr)
     const char* errors[8];
     uint8_t errorCount;
 };
@@ -29,7 +31,7 @@ struct HistoryPoint {
 };
 
 // Parsed incoming command
-enum class CmdType { SET_SP, ALARM, SESSION_NEW, SESSION_DOWNLOAD, SET_FAN_MODE, UNKNOWN };
+enum class CmdType { SET_SP, ALARM, SESSION_NEW, SESSION_DOWNLOAD, SET_FAN_MODE, SET_TEMP_BACKEND, UNKNOWN };
 struct ParsedCommand {
     CmdType type;
     float setpoint;
@@ -37,6 +39,7 @@ struct ParsedCommand {
     bool hasMeat1Target, hasMeat2Target, hasPitBand;
     char format[8]; // "csv" or "json"
     char fanMode[20]; // "fan_only", "fan_and_damper", "damper_primary"
+    char thermometerBackend[12]; // "wired" or "meater"
 };
 
 // Returns bytes written to buf (excluding null terminator)

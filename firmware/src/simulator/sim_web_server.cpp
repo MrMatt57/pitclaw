@@ -200,6 +200,10 @@ void SimWebServer::handleMessage(struct mg_connection* c, const char* data, size
             if (_onFanMode) _onFanMode(cmd.fanMode);
             break;
 
+        case bbq_protocol::CmdType::SET_TEMP_BACKEND:
+            printf("[WEB] Thermometer backend changed to %s\n", cmd.thermometerBackend);
+            break;
+
         default:
             break;
     }
