@@ -194,6 +194,7 @@ ParsedCommand parseCommand(const char* data, size_t len) {
     ParsedCommand cmd;
     memset(&cmd, 0, sizeof(cmd));
     cmd.type = CmdType::UNKNOWN;
+    if (!data || len == 0 || len > 512) return cmd;
 
     JsonDocument doc;
     DeserializationError err = deserializeJson(doc, data, len);
@@ -202,8 +203,11 @@ ParsedCommand parseCommand(const char* data, size_t len) {
     const char* type = doc["type"] | "";
 
     if (strcmp(type, "set") == 0) {
+        if (!doc["sp"].is<float>()) return cmd;
+        float sp = doc["sp"].as<float>();
+        if (!std::isfinite(sp) || sp < 100 || sp > 500) return cmd;
         cmd.type = CmdType::SET_SP;
-        cmd.setpoint = doc["sp"].as<float>();
+        cmd.setpoint = sp;
     }
     else if (strcmp(type, "alarm") == 0) {
         cmd.type = CmdType::ALARM;
@@ -211,7 +215,7 @@ ParsedCommand parseCommand(const char* data, size_t len) {
         if (doc["meat1Target"].is<float>()) {
             cmd.hasMeat1Target = true;
             cmd.meat1Target = doc["meat1Target"].as<float>();
-        } else if (doc["meat1Target"].isNull()) {
+        } else if (!doc["meat1Target"].isUnbound() && doc["meat1Target"].isNull()) {
             cmd.hasMeat1Target = true;
             cmd.meat1Target = 0;
         }
@@ -219,7 +223,7 @@ ParsedCommand parseCommand(const char* data, size_t len) {
         if (doc["meat2Target"].is<float>()) {
             cmd.hasMeat2Target = true;
             cmd.meat2Target = doc["meat2Target"].as<float>();
-        } else if (doc["meat2Target"].isNull()) {
+        } else if (!doc["meat2Target"].isUnbound() && doc["meat2Target"].isNull()) {
             cmd.hasMeat2Target = true;
             cmd.meat2Target = 0;
         }
@@ -228,10 +232,16 @@ ParsedCommand parseCommand(const char* data, size_t len) {
             cmd.hasPitBand = true;
             cmd.pitBand = doc["pitBand"].as<float>();
         }
+        if ((cmd.hasMeat1Target && (!std::isfinite(cmd.meat1Target) || cmd.meat1Target < 0 || cmd.meat1Target > 212)) ||
+            (cmd.hasMeat2Target && (!std::isfinite(cmd.meat2Target) || cmd.meat2Target < 0 || cmd.meat2Target > 212)) ||
+            (cmd.hasPitBand && (!std::isfinite(cmd.pitBand) || cmd.pitBand <= 0 || cmd.pitBand > 100))) {
+            cmd.type = CmdType::UNKNOWN;
+        }
     }
     else if (strcmp(type, "config") == 0) {
         const char* fm = doc["fanMode"] | "";
-        if (fm[0] != '\0') {
+        if (strcmp(fm, "fan_only") == 0 || strcmp(fm, "fan_and_damper") == 0 ||
+            strcmp(fm, "damper_primary") == 0) {
             cmd.type = CmdType::SET_FAN_MODE;
             strncpy(cmd.fanMode, fm, sizeof(cmd.fanMode) - 1);
             cmd.fanMode[sizeof(cmd.fanMode) - 1] = '\0';

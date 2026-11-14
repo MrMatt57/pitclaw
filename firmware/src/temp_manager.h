@@ -1,7 +1,7 @@
 #pragma once
+#include "units.h"
 
 #include "config.h"
-#include "units.h"
 #include <stdint.h>
 #include <math.h>
 
@@ -77,18 +77,21 @@ public:
     // Set whether to return temperatures in Fahrenheit
     void setUseFahrenheit(bool useF);
 
-    // Convert Celsius to Fahrenheit (delegates to shared units.h)
-    static float cToF(float tempC) { return celsiusToFahrenheit(tempC); }
+    // Convert Celsius to Fahrenheit (static utility)
+    static float cToF(float tempC);
+
+    // Hardware-independent sample processing, also used by bench diagnostics/tests.
+    void processRawReading(uint8_t probe, int16_t raw);
+    static float adcToVoltage(int16_t raw);
+    static float adcToResistance(int16_t raw);
 
 private:
-    // Convert raw ADC value to resistance using voltage divider formula
-    float adcToResistance(int16_t raw) const;
-
     // Convert resistance to temperature in Celsius using Steinhart-Hart
     float resistanceToTempC(float resistance, const ProbeConfig& cfg) const;
 
 #ifndef NATIVE_BUILD
     Adafruit_ADS1115 _ads;
+    bool _adsAvailable = false;
 #endif
 
     // Per-probe state

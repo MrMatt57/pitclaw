@@ -11,13 +11,110 @@
 #include <cstring>
 
 #ifndef SIMULATOR_BUILD
-#include <TFT_eSPI.h>
+#define LGFX_USE_V1
+#include <LovyanGFX.hpp>
+#include <Wire.h>
+
+// Direct FT6336 touch driver (LovyanGFX's Touch_FT5x06 silently returned no
+// touches on this board; reading the chip directly works reliably).
+namespace {
+TwoWire ft6336_wire(1);
+constexpr uint8_t FT6336_ADDR = 0x38;
+bool ft6336_inited = false;
+
+void ft6336_begin() {
+    ft6336_wire.begin(6, 5, 400000);
+    ft6336_inited = true;
+}
+
+bool ft6336_read(uint16_t* x, uint16_t* y) {
+    if (!ft6336_inited) return false;
+    ft6336_wire.beginTransmission(FT6336_ADDR);
+    ft6336_wire.write((uint8_t)0x02);
+    if (ft6336_wire.endTransmission(false) != 0) return false;
+    if (ft6336_wire.requestFrom((uint8_t)FT6336_ADDR, (uint8_t)5) != 5) return false;
+    uint8_t td_status = ft6336_wire.read();
+    uint8_t xh = ft6336_wire.read();
+    uint8_t xl = ft6336_wire.read();
+    uint8_t yh = ft6336_wire.read();
+    uint8_t yl = ft6336_wire.read();
+    if ((td_status & 0x0F) == 0) return false;
+    uint16_t raw_x = ((xh & 0x0F) << 8) | xl;
+    uint16_t raw_y = ((yh & 0x0F) << 8) | yl;
+    // FT6336 reports in panel-native (portrait 320x480). Display is landscape
+    // (rotation 1, 480x320). Map: dx = raw_y, dy = 319 - raw_x.
+    *x = raw_y;
+    if (raw_x > 319) raw_x = 319;
+    *y = 319 - raw_x;
+    return true;
+}
+}  // namespace
 
 // --------------------------------------------------------------------------
-// Display driver (hardware)
+// Display driver (hardware) — WT32-SC01 Plus (PanLee ZX3D50CE08S-V16)
+// ST7796 480x320 over 8-bit i8080 parallel bus, FT6336 capacitive touch
 // --------------------------------------------------------------------------
 
-static TFT_eSPI tft = TFT_eSPI();
+class LGFX_WT32SC01Plus : public lgfx::LGFX_Device {
+    lgfx::Panel_ST7796 _panel;
+    lgfx::Bus_Parallel8 _bus;
+    lgfx::Light_PWM _light;
+public:
+    LGFX_WT32SC01Plus() {
+        {
+            auto cfg = _bus.config();
+            cfg.freq_write = 20000000;
+            cfg.pin_wr = 47;
+            cfg.pin_rd = -1;
+            cfg.pin_rs = 0;     // DC
+            cfg.pin_d0 = 9;
+            cfg.pin_d1 = 46;
+            cfg.pin_d2 = 3;
+            cfg.pin_d3 = 8;
+            cfg.pin_d4 = 18;
+            cfg.pin_d5 = 17;
+            cfg.pin_d6 = 16;
+            cfg.pin_d7 = 15;
+            _bus.config(cfg);
+            _panel.setBus(&_bus);
+        }
+        {
+            auto cfg = _panel.config();
+            cfg.pin_cs = -1;
+            cfg.pin_rst = 4;
+            cfg.pin_busy = -1;
+            cfg.memory_width = 320;
+            cfg.memory_height = 480;
+            cfg.panel_width = 320;
+            cfg.panel_height = 480;
+            cfg.offset_x = 0;
+            cfg.offset_y = 0;
+            cfg.offset_rotation = 0;
+            cfg.dummy_read_pixel = 8;
+            cfg.dummy_read_bits = 1;
+            cfg.readable = false;
+            cfg.invert = true;
+            cfg.rgb_order = false;
+            cfg.dlen_16bit = false;
+            cfg.bus_shared = false;
+            _panel.config(cfg);
+        }
+        {
+            auto cfg = _light.config();
+            cfg.pin_bl = 45;
+            cfg.invert = false;
+            cfg.freq = 44100;
+            cfg.pwm_channel = 7;
+            _light.config(cfg);
+            _panel.setLight(&_light);
+        }
+        // Touch is handled by direct FT6336 I2C polling above (LovyanGFX
+        // Touch_FT5x06 didn't reliably report on this board).
+        setPanel(&_panel);
+    }
+};
+
+static LGFX_WT32SC01Plus tft;
 
 static lv_color_t draw_buf1[DISPLAY_WIDTH * 40];
 static lv_color_t draw_buf2[DISPLAY_WIDTH * 40];
@@ -28,17 +125,15 @@ static void disp_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* px
 
     tft.startWrite();
     tft.setAddrWindow(area->x1, area->y1, w, h);
-    tft.pushColors((uint16_t*)px_map, w * h, true);
+    tft.writePixels((uint16_t*)px_map, w * h, true);
     tft.endWrite();
 
     lv_display_flush_ready(disp);
 }
 
 static void touchpad_read_cb(lv_indev_t* indev, lv_indev_data_t* data) {
-    uint16_t touchX, touchY;
-    bool touched = tft.getTouch(&touchX, &touchY);
-
-    if (touched) {
+    uint16_t touchX = 0, touchY = 0;
+    if (ft6336_read(&touchX, &touchY)) {
         data->state = LV_INDEV_STATE_PRESSED;
         data->point.x = touchX;
         data->point.y = touchY;
@@ -1226,7 +1321,9 @@ void ui_init() {
 #else
     tft.begin();
     tft.setRotation(1);
-    tft.fillScreen(TFT_BLACK);
+    tft.setBrightness(220);
+    tft.fillScreen(0x0000);
+    ft6336_begin();
 
     lv_display_t* disp = lv_display_create(DISPLAY_WIDTH, DISPLAY_HEIGHT);
     lv_display_set_buffers(disp, draw_buf1, draw_buf2, sizeof(draw_buf1), LV_DISPLAY_RENDER_MODE_PARTIAL);

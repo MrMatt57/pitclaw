@@ -16,6 +16,7 @@ PidController::PidController()
 #endif
     , _lidState(LidState::CLOSED)
     , _enabled(true)
+    , _lidDetectionArmed(false)
     , _lastComputeMs(0)
 {
 }
@@ -33,6 +34,7 @@ void PidController::begin(float kp, float ki, float kd) {
     _pidSetpoint = 0.0f;
     _lidState = LidState::CLOSED;
     _enabled = true;
+    _lidDetectionArmed = false;
 
 #ifndef NATIVE_BUILD
     if (_pid != nullptr) {
@@ -108,10 +110,13 @@ void PidController::setTunings(float kp, float ki, float kd) {
 }
 
 void PidController::resetIntegrator() {
+    _pidOutput = 0.0f;
+    _lidState = LidState::CLOSED;
+    _lidDetectionArmed = false;
 #ifndef NATIVE_BUILD
     if (_pid != nullptr) {
         _pid->Reset();
-        _pid->SetMode(QuickPID::Control::automatic);
+        _pid->SetMode(_enabled ? QuickPID::Control::automatic : QuickPID::Control::manual);
     }
     Serial.println("[PID] Integrator reset (setpoint change)");
 #endif
@@ -132,6 +137,8 @@ void PidController::setEnabled(bool enabled) {
 
     if (!enabled) {
         _pidOutput = 0.0f;
+        _lidState = LidState::CLOSED;
+        _lidDetectionArmed = false;
     }
 }
 
@@ -144,6 +151,12 @@ void PidController::updateLidState(float currentTemp, float setpoint) {
 
     float dropThreshold = setpoint * (1.0f - LID_OPEN_DROP_PCT / 100.0f);
     float recoverThreshold = setpoint * (1.0f - LID_OPEN_RECOVER_PCT / 100.0f);
+
+    // Initial heat-up and setpoint increases must be allowed to heat the pit.
+    if (!_lidDetectionArmed) {
+        if (currentTemp >= recoverThreshold) _lidDetectionArmed = true;
+        return;
+    }
 
     switch (_lidState) {
         case LidState::CLOSED:

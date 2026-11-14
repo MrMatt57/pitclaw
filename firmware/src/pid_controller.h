@@ -65,6 +65,7 @@ private:
 
     LidState _lidState;
     bool _enabled;
+    bool _lidDetectionArmed;
 
     // Timing
     unsigned long _lastComputeMs;

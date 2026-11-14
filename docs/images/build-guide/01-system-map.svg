@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="740" viewBox="0 0 1120 740" role="img" aria-labelledby="title desc"><title id="title">01 / Power and signal map</title><desc id="desc">Functional connections — not a physical cable view. All grounds connect electrically.</desc><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8" fill="#536777"/></marker></defs><rect width="1120" height="740" fill="#f4f7fa"/>
+<text x="36" y="45" font-family="Arial, sans-serif" font-size="28" fill="#173248" font-weight="700">01 / Power and signal map</text>
+<text x="36" y="76" font-family="Arial, sans-serif" font-size="16" fill="#536777" font-weight="400">Functional connections — not a physical cable view. All grounds connect electrically.</text>
+<rect x="40" y="125" width="220" height="110" rx="12" fill="white" stroke="#ba4c16" stroke-width="2"/>
+<text x="58" y="157" font-family="Arial, sans-serif" font-size="20" fill="#ba4c16" font-weight="700">12V barrel input</text>
+<text x="58" y="186" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Verify jack polarity</text>
+<text x="58" y="211" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Power off for wiring</text>
+<rect x="390" y="125" width="290" height="110" rx="12" fill="white" stroke="#ba4c16" stroke-width="2"/>
+<text x="408" y="157" font-family="Arial, sans-serif" font-size="20" fill="#ba4c16" font-weight="700">MP1584EN buck</text>
+<text x="408" y="186" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Adjust to 5.00V unloaded</text>
+<text x="408" y="211" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Then verify under load</text>
+<path d="M260 160 L390 160" fill="none" stroke="#ba4c16" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="295" y="147" font-family="Arial, sans-serif" font-size="17" fill="#ba4c16" font-weight="700">12V</text>
+<rect x="820" y="125" width="260" height="110" rx="12" fill="white" stroke="#ba4c16" stroke-width="2"/>
+<text x="838" y="157" font-family="Arial, sans-serif" font-size="20" fill="#ba4c16" font-weight="700">5015 fan section</text>
+<text x="838" y="186" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">12V load supply</text>
+<text x="838" y="211" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">See diagram 03</text>
+<path d="M315 160 L315 105 L950 105 L950 125" fill="none" stroke="#ba4c16" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<circle cx="315" cy="160" r="5" fill="#ba4c16"/>
+<rect x="390" y="310" width="290" height="145" rx="12" fill="white" stroke="#176baf" stroke-width="2"/>
+<text x="408" y="342" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">WT32 display</text>
+<text x="408" y="371" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">EXT 1 = 5V; EXT 2 = GND</text>
+<text x="408" y="396" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">DEBUG 2 / verified 3V3</text>
+<text x="408" y="421" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">supplies ADC + pull-ups</text>
+<path d="M530 235 L530 310" fill="none" stroke="#ba4c16" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="545" y="280" font-family="Arial, sans-serif" font-size="17" fill="#ba4c16" font-weight="700">5V</text>
+<rect x="820" y="310" width="260" height="145" rx="12" fill="white" stroke="#176baf" stroke-width="2"/>
+<text x="838" y="342" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">MG90S servo</text>
+<text x="838" y="371" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">5V from power rail</text>
+<text x="838" y="396" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Return to power GND</text>
+<text x="838" y="421" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">GPIO13 = signal</text>
+<path d="M680 200 L755 200 L755 335 L820 335" fill="none" stroke="#ba4c16" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="709" y="185" font-family="Arial, sans-serif" font-size="17" fill="#ba4c16" font-weight="700">5V</text>
+<rect x="40" y="310" width="245" height="145" rx="12" fill="white" stroke="#15775f" stroke-width="2"/>
+<text x="58" y="342" font-family="Arial, sans-serif" font-size="20" fill="#15775f" font-weight="700">ADS1115 + probes</text>
+<text x="58" y="371" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">VDD + dividers = 3.3V</text>
+<text x="58" y="396" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">SDA = GPIO10</text>
+<text x="58" y="421" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">SCL = GPIO11</text>
+<path d="M390 355 L285 355" fill="none" stroke="#15775f" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="303" y="340" font-family="Arial, sans-serif" font-size="17" fill="#15775f" font-weight="700">3.3V</text>
+<path d="M285 405 L390 405" fill="none" stroke="#176baf" stroke-width="3" stroke-linejoin="round"/>
+<text x="305" y="430" font-family="Arial, sans-serif" font-size="17" fill="#176baf" font-weight="700">I2C</text>
+<rect x="40" y="515" width="1040" height="135" rx="12" fill="white" stroke="#173248" stroke-width="2"/>
+<text x="58" y="547" font-family="Arial, sans-serif" font-size="20" fill="#173248" font-weight="700">Shared ground, separate return routes</text>
+<text x="58" y="576" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Buck GND, display GND, ADS1115 GND, probe sleeves, MOSFET source and servo GND connect.</text>
+<text x="58" y="601" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Route fan and servo current back to the power ground; keep it out of probe-ground leads.</text>
+<text x="58" y="626" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">3.3V is NOT on the eight-pin extension connector. Verify each conductor with a meter.</text>
+<text x="36" y="716" font-family="Arial, sans-serif" font-size="15" fill="#536777" font-weight="400">Colors identify nets in this drawing; they do not specify the colors of purchased cables.</text></svg>

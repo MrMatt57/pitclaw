@@ -1,4 +1,5 @@
 #include "fan_controller.h"
+#include <math.h>
 
 #ifndef NATIVE_BUILD
 #include <Arduino.h>
@@ -36,6 +37,10 @@ void FanController::begin() {
 void FanController::setSpeed(float percent) {
     if (_manualMode) return;
 
+    if (!isfinite(percent) || percent <= 0.0f) {
+        off();
+        return;
+    }
     // Clamp to valid range
     if (percent < 0.0f) percent = 0.0f;
     if (percent > 100.0f) percent = 100.0f;

@@ -26,6 +26,9 @@ void AlarmManager::begin() {
 #ifndef NATIVE_BUILD
     pinMode(PIN_BUZZER, OUTPUT);
     digitalWrite(PIN_BUZZER, LOW);
+    ledcSetup(BUZZER_PWM_CHANNEL, ALARM_BUZZER_FREQ, 8);
+    ledcAttachPin(PIN_BUZZER, BUZZER_PWM_CHANNEL);
+    ledcWrite(BUZZER_PWM_CHANNEL, 0);
     Serial.printf("[ALARM] Buzzer initialized on pin %d.\n", PIN_BUZZER);
 #endif
 }
@@ -140,9 +143,9 @@ void AlarmManager::setPitBand(float band) {
 void AlarmManager::setBuzzer(bool on) {
 #ifndef NATIVE_BUILD
     if (on) {
-        tone(PIN_BUZZER, ALARM_BUZZER_FREQ);
+        ledcWriteTone(BUZZER_PWM_CHANNEL, ALARM_BUZZER_FREQ);
     } else {
-        noTone(PIN_BUZZER);
+        ledcWrite(BUZZER_PWM_CHANNEL, 0);
     }
 #endif
     _buzzerOn = on;

@@ -253,8 +253,24 @@ void test_off_during_kickstart(void) {
 // Main
 // --------------------------------------------------------------------------
 
+void test_zero_and_invalid_request_cancel_kickstart() {
+    fan->setSpeed(50);
+    fan->update();
+    TEST_ASSERT_TRUE(fan->isKickStarting());
+    fan->setSpeed(0);
+    fan->update();
+    TEST_ASSERT_EQUAL_UINT8(0, fan->getCurrentDuty());
+    TEST_ASSERT_FALSE(fan->isKickStarting());
+    fan->setSpeed(50);
+    fan->update();
+    fan->setSpeed(NAN);
+    fan->update();
+    TEST_ASSERT_EQUAL_UINT8(0, fan->getCurrentDuty());
+}
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
+    RUN_TEST(test_zero_and_invalid_request_cancel_kickstart);
 
     // Initial state
     RUN_TEST(test_initial_speed_is_zero);

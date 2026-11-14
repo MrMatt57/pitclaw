@@ -62,7 +62,13 @@ void BBQWebServer::begin() {
     });
 
     // Serve static files from LittleFS (web UI)
-    _server->serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
+    // Only public assets belong on HTTP. Config and cook data share LittleFS.
+    _server->on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+        request->send(LittleFS, "/index.html", "text/html");
+    });
+    const char* assets[] = {"/index.html", "/app.js", "/style.css",
+                            "/manifest.json", "/favicon.svg", "/sw.js"};
+    for (const char* asset : assets) _server->serveStatic(asset, LittleFS, asset);
 
     // Fallback 404
     _server->onNotFound([](AsyncWebServerRequest* request) {
@@ -310,7 +316,6 @@ void BBQWebServer::onWsEvent(AsyncWebSocket* server, AsyncWebSocketClient* clien
                 AwsFrameInfo* info = (AwsFrameInfo*)arg;
                 if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
                     // Complete text message received
-                    data[len] = '\0';  // Null-terminate
                     handleWebSocketMessage(client->id(), (char*)data, len);
                 }
             }

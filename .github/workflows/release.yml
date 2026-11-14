@@ -1,99 +1,32 @@
 name: Release
-
 on:
   push:
-    branches: [main]
-
+    tags: ['v*']
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  release:
-    name: Build & Release
-    runs-on: ubuntu-latest
+  validate:
+    uses: ./.github/workflows/ci.yml
+    with:
+      version: ${{ github.ref_name }}
+  draft:
+    name: Draft tested release
+    needs: validate
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
-
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
         with:
-          fetch-depth: 0
-
-      - name: Compute version tag
-        id: version
-        run: |
-          YEAR=$(date -u +"%Y")
-          MONTH=$(date -u +"%-m")
-          PATCH=0
-
-          # Find next available patch number for this month
-          while git tag -l "v${YEAR}.${MONTH}.${PATCH}" | grep -q .; do
-            PATCH=$((PATCH + 1))
-          done
-
-          VERSION="${YEAR}.${MONTH}.${PATCH}"
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Version: ${VERSION}"
-
-      - uses: actions/setup-python@v6
+          name: firmware-images
+          path: release
+      - uses: softprops/action-gh-release@v2
         with:
-          python-version: "3.12"
-
-      - name: Install PlatformIO
-        run: pip install platformio
-
-      - name: Cache PlatformIO
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.platformio
-            .pio
-          key: pio-${{ hashFiles('firmware/platformio.ini') }}
-          restore-keys: pio-
-
-      - name: Inject version into firmware
-        run: |
-          sed -i 's/#define FIRMWARE_VERSION    "dev"/#define FIRMWARE_VERSION    "${{ steps.version.outputs.version }}"/' firmware/src/config.h
-
-      - name: Build firmware
-        run: pio run -e wt32_sc01_plus
-        working-directory: firmware
-
-      - name: Build LittleFS image
-        run: pio run -e wt32_sc01_plus --target buildfs
-        working-directory: firmware
-
-      - name: Generate STLs from OpenSCAD source
-        run: |
-          sudo apt-get update && sudo apt-get install -y openscad
-          cd enclosure
-          mkdir -p stl
-          openscad -o stl/front-bezel.stl -D 'part="bezel"' bbq-case.scad
-          openscad -o stl/rear-shell.stl -D 'part="shell"' bbq-case.scad
-          openscad -o stl/kickstand.stl -D 'part="kickstand"' bbq-case.scad
-          openscad -o stl/blower-housing.stl -D 'part="housing"' bbq-fan-assembly.scad
-          openscad -o stl/uds-pipe-adapter.stl -D 'part="adapter"' bbq-fan-assembly.scad
-
-      - name: Collect artifacts
-        run: |
-          mkdir -p release
-          VERSION="${{ steps.version.outputs.version }}"
-          cp firmware/.pio/build/wt32_sc01_plus/firmware.bin "release/pitclaw-firmware-${VERSION}.bin"
-          cp firmware/.pio/build/wt32_sc01_plus/littlefs.bin "release/pitclaw-littlefs-${VERSION}.bin"
-
-          # Generate SHA-256 checksums
-          cd release
-          sha256sum "pitclaw-firmware-${VERSION}.bin" > "pitclaw-firmware-${VERSION}.sha256"
-          sha256sum "pitclaw-littlefs-${VERSION}.bin" > "pitclaw-littlefs-${VERSION}.sha256"
-          cd ..
-
-          # Include STL files if they exist
-          if ls enclosure/stl/*.stl 1>/dev/null 2>&1; then
-            cp enclosure/stl/*.stl release/
-          fi
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: Pit Claw ${{ steps.version.outputs.tag }}
+          draft: true
+          tag_name: ${{ github.ref_name }}
           generate_release_notes: true
+          fail_on_unmatched_files: true
           files: release/*

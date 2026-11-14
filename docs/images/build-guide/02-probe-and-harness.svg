@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="800" viewBox="0 0 1120 800" role="img" aria-labelledby="title desc"><title id="title">02 / Build one probe channel, then repeat</title><desc id="desc">Three identical circuits: Pit → A0, Meat 1 → A1, Meat 2 → A2. A3 stays unused.</desc><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8" fill="#536777"/></marker></defs><rect width="1120" height="800" fill="#f4f7fa"/>
+<text x="36" y="45" font-family="Arial, sans-serif" font-size="28" fill="#173248" font-weight="700">02 / Build one probe channel, then repeat</text>
+<text x="36" y="76" font-family="Arial, sans-serif" font-size="16" fill="#536777" font-weight="400">Three identical circuits: Pit → A0, Meat 1 → A1, Meat 2 → A2. A3 stays unused.</text>
+<text x="75" y="140" font-family="Arial, sans-serif" font-size="20" fill="#15775f" font-weight="700">3.3V</text>
+<path d="M160 132 L160 175" fill="none" stroke="#15775f" stroke-width="3" stroke-linejoin="round"/>
+<rect x="148" y="175" width="24" height="70" fill="white" stroke="#173248" stroke-width="3"/>
+<text x="200" y="211" font-family="Arial, sans-serif" font-size="20" fill="#173248" font-weight="700">10kΩ / 1%</text>
+<path d="M160 245 L160 290 L515 290" fill="none" stroke="#15775f" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="160" cy="290" r="5" fill="#15775f"/>
+<text x="210" y="276" font-family="Arial, sans-serif" font-size="17" fill="#15775f" font-weight="700">SENSE NODE</text>
+<rect x="515" y="245" width="235" height="90" rx="12" fill="white" stroke="#15775f" stroke-width="2"/>
+<text x="533" y="277" font-family="Arial, sans-serif" font-size="20" fill="#15775f" font-weight="700">ADS1115</text>
+<text x="533" y="306" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">A0, A1 or A2</text>
+<path d="M160 290 L160 410" fill="none" stroke="#15775f" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="160" cy="340" r="5" fill="#15775f"/>
+<rect x="65" y="410" width="240" height="100" rx="12" fill="white" stroke="#173248" stroke-width="2"/>
+<text x="83" y="442" font-family="Arial, sans-serif" font-size="20" fill="#173248" font-weight="700">2.5mm mono jack</text>
+<text x="83" y="471" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Tip = sense node</text>
+<text x="83" y="496" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Sleeve = GND</text>
+<path d="M160 510 L160 545" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M160 545 L160 561" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M143.0 561 L177.0 561" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M149.0 568 L171.0 568" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M155.0 575 L165.0 575" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<text x="53" y="602" font-family="Arial, sans-serif" font-size="16" fill="#536777" font-weight="400">Probe thermistor connects</text>
+<text x="53" y="625" font-family="Arial, sans-serif" font-size="16" fill="#536777" font-weight="400">between tip and sleeve.</text>
+<path d="M160 340 L380 340 L380 420" fill="none" stroke="#15775f" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="380" cy="340" r="5" fill="#15775f"/>
+<path d="M355 420 L405 420" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M355 432 L405 432" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M380 432 L380 545" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M380 545 L380 561" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M363.0 561 L397.0 561" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M369.0 568 L391.0 568" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M375.0 575 L385.0 575" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<text x="417" y="425" font-family="Arial, sans-serif" font-size="19" fill="#173248" font-weight="700">100nF</text>
+<text x="417" y="451" font-family="Arial, sans-serif" font-size="16" fill="#536777" font-weight="400">node → GND</text>
+<rect x="805" y="115" width="275" height="495" rx="12" fill="white" stroke="#176baf" stroke-width="2"/>
+<text x="823" y="147" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">WT32 EXT net list</text>
+<text x="823" y="176" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">1    5V from buck</text>
+<text x="823" y="201" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">2    GND</text>
+<text x="823" y="226" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">3    GPIO10 → SDA</text>
+<text x="823" y="251" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">4    GPIO11 → SCL</text>
+<text x="823" y="276" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">5    GPIO12 → fan gate</text>
+<text x="823" y="301" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">6    GPIO13 → servo</text>
+<text x="823" y="326" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">7    GPIO14 → piezo</text>
+<text x="823" y="351" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">8    GPIO21: unused</text>
+<text x="823" y="376" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400"></text>
+<text x="823" y="401" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Pin numbers only.</text>
+<text x="823" y="426" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Confirm pin 1 on the PCB.</text>
+<text x="823" y="451" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Cable views can reverse</text>
+<text x="823" y="476" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">the apparent left/right order.</text>
+<rect x="515" y="365" width="235" height="165" rx="12" fill="white" stroke="#15775f" stroke-width="2"/>
+<text x="533" y="397" font-family="Arial, sans-serif" font-size="20" fill="#15775f" font-weight="700">ADC power</text>
+<text x="533" y="426" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">VDD = 3.3V</text>
+<text x="533" y="451" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">GND + ADDR = GND</text>
+<text x="533" y="476" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Verify 3.3V I2C pull-ups</text>
+<text x="533" y="501" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">and local bypass cap.</text>
+<rect x="40" y="660" width="1040" height="85" rx="12" fill="white" stroke="#15775f" stroke-width="2"/>
+<text x="58" y="692" font-family="Arial, sans-serif" font-size="20" fill="#15775f" font-weight="700">Meter check before a probe</text>
+<text x="58" y="721" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">10kΩ across tip/sleeve: ~1.650V, 13200 counts, 184.2°F at a measured 3.300V rail.</text>
+<text x="36" y="776" font-family="Arial, sans-serif" font-size="15" fill="#536777" font-weight="400">Identify jack contacts with a plugged-in connector and continuity meter. Leave switched contacts unused.</text></svg>
