@@ -3,13 +3,19 @@ import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 import { once } from 'node:events';
 import assert from 'node:assert/strict';
+import { mkdtempSync, cpSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const firmware = resolve(root, 'firmware');
 const binary = resolve(firmware, '.pio/build/simulator/program' + (process.platform === 'win32' ? '.exe' : ''));
+// A private commissioned fixture leaves the user's simulator setup untouched.
+const fixture = mkdtempSync(resolve(tmpdir(), 'pitclaw-smoke-'));
+cpSync(resolve(firmware, 'data'), resolve(fixture, 'data'), { recursive: true });
+writeFileSync(resolve(fixture, '.sim_setup_complete'), '1');
 const port = 18937;
 const child = spawn(binary, ['--port', String(port)], {
-  cwd: firmware, windowsHide: true,
+  cwd: fixture, windowsHide: true,
   env: { ...process.env, SDL_VIDEODRIVER: 'dummy', SDL_AUDIODRIVER: 'dummy' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
@@ -27,7 +33,7 @@ async function waitFor(predicate, label) {
     if (child.exitCode !== null) throw Error('Simulator exited: ' + output);
     await pause(100);
   }
-  throw Error('Timeout: ' + label + '\n' + output);
+  throw Error('Timeout: ' + label + '\nMessages: ' + JSON.stringify(messages.slice(-3)) + '\n' + output);
 }
 async function command(cmd, predicate) {
   messages.length = 0;
@@ -59,4 +65,6 @@ try {
 } finally {
   ws?.close();
   child.kill();
+  await Promise.race([once(child, 'exit'), pause(2000)]);
+  rmSync(fixture, { recursive: true, force: true });
 }
