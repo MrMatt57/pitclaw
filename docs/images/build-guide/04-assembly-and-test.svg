@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="850" viewBox="0 0 1120 850" role="img" aria-labelledby="title desc"><title id="title">04 / Assemble in stages; close the case last</title><desc id="desc">Bench-test each subassembly before installing it. Use one matching CAD/STL revision.</desc><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8" fill="#536777"/></marker></defs><rect width="1120" height="850" fill="#f4f7fa"/>
+<text x="36" y="45" font-family="Arial, sans-serif" font-size="28" fill="#173248" font-weight="700">04 / Assemble in stages; close the case last</text>
+<text x="36" y="76" font-family="Arial, sans-serif" font-size="16" fill="#536777" font-weight="400">Bench-test each subassembly before installing it. Use one matching CAD/STL revision.</text>
+<rect x="35" y="120" width="245" height="150" rx="12" fill="white" stroke="#176baf" stroke-width="2"/>
+<text x="53" y="152" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">1  LABEL</text>
+<text x="53" y="181" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Map display cable pins.</text>
+<text x="53" y="206" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Pre-wire panel jacks.</text>
+<text x="53" y="231" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Label both lead ends.</text>
+<path d="M280 190 L305 190" fill="none" stroke="#536777" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="310" y="120" width="245" height="150" rx="12" fill="white" stroke="#176baf" stroke-width="2"/>
+<text x="328" y="152" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">2  BUILD</text>
+<text x="328" y="181" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Repeat sensor circuit ×3.</text>
+<text x="328" y="206" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Build power/output section.</text>
+<text x="328" y="231" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Insulate and secure parts.</text>
+<path d="M555 190 L580 190" fill="none" stroke="#536777" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="585" y="120" width="245" height="150" rx="12" fill="white" stroke="#176baf" stroke-width="2"/>
+<text x="603" y="152" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">3  TEST</text>
+<text x="603" y="181" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Set buck to 5.00V first.</text>
+<text x="603" y="206" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Test each input/output.</text>
+<text x="603" y="231" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Then test combined loads.</text>
+<path d="M830 190 L855 190" fill="none" stroke="#536777" stroke-width="3" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="860" y="120" width="245" height="150" rx="12" fill="white" stroke="#176baf" stroke-width="2"/>
+<text x="878" y="152" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">4  FIT</text>
+<text x="878" y="181" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Dry-fit boards and ports.</text>
+<text x="878" y="206" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Route and secure leads.</text>
+<text x="878" y="231" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Fit strain relief; close case.</text>
+<rect x="40" y="325" width="500" height="300" rx="12" fill="white" stroke="#176baf" stroke-width="2"/>
+<text x="58" y="357" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">USB flashing / probe checks</text>
+<text x="58" y="386" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">12V supply disconnected; fan/servo unplugged.</text>
+<text x="58" y="411" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Isolate the WT32 external 5V lead.</text>
+<text x="58" y="436" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Isolate output signals to unpowered loads/drivers.</text>
+<text x="58" y="461" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Connect the display’s built-in USB.</text>
+<text x="58" y="486" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400"></text>
+<text x="58" y="511" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Flash bench → status → resistor/open/short tests.</text>
+<text x="58" y="536" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Disconnect USB before restoring external wiring.</text>
+<rect x="580" y="325" width="500" height="300" rx="12" fill="white" stroke="#ba4c16" stroke-width="2"/>
+<text x="598" y="357" font-family="Arial, sans-serif" font-size="20" fill="#ba4c16" font-weight="700">External-power motor checks</text>
+<text x="598" y="386" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Built-in USB stays disconnected.</text>
+<text x="598" y="411" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Restore checked external 5V/output wiring.</text>
+<text x="598" y="436" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Use a 3.3V-logic UART adapter:</text>
+<text x="598" y="461" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Adapter RX ← DEBUG 3 (TX)</text>
+<text x="598" y="486" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Adapter TX → DEBUG 4 (RX)</text>
+<text x="598" y="511" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Adapter GND → DEBUG 7; VCC unconnected.</text>
+<text x="598" y="536" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Power unit first, then connect adapter to PC.</text>
+<text x="598" y="561" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Commands: fan 100 / servo 1500 / beep / off</text>
+<rect x="40" y="670" width="1040" height="125" rx="12" fill="white" stroke="#15775f" stroke-width="2"/>
+<text x="58" y="702" font-family="Arial, sans-serif" font-size="20" fill="#15775f" font-weight="700">Final checks before a supervised cook</text>
+<text x="58" y="731" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Pit unplug + short • ADC loss • reset/reboot • Wi-Fi loss • combined motor/display loads</text>
+<text x="58" y="756" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Record rail voltages, temperature readings, fan behavior and calibrated damper endpoints.</text>
+<text x="58" y="781" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Bench acceptance is not production approval; the review lists the remaining release gates.</text>
+<text x="36" y="826" font-family="Arial, sans-serif" font-size="15" fill="#536777" font-weight="400">Current main: bezel + rear shell + kickstand. Local inset-box prototypes require their own matching fit checks.</text></svg>

@@ -44,3 +44,9 @@ manifest = {'version': version,
 (out / 'SHA256SUMS').write_text(''.join(f'{digest}  {name}\n' for name, digest in files.items()))
 for name in ['build-guide.md', 'production-review.md']:
     shutil.copyfile(ROOT / 'docs' / name, out / name)
+
+# Keep the illustrated guide usable in the flat release attachment bundle.
+for illustration in (ROOT / 'docs/images/build-guide').glob('*.svg'):
+    shutil.copyfile(illustration, out / illustration.name)
+guide = out / 'build-guide.md'
+guide.write_text(guide.read_text(encoding='utf-8').replace('images/build-guide/', ''), encoding='utf-8')

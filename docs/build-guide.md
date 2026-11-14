@@ -21,6 +21,18 @@
 | 7 / GPIO14 | Qualified piezo drive |
 | 8 / GPIO21 | Unconnected |
 
+## Illustrated wiring and assembly
+
+These diagrams show electrical connections and build order. Connector outlines are functional blocks; verify the physical pin orientation on your parts. Click any diagram to enlarge.
+
+[![Power distribution: 12V input to buck and fan, 5V to display and servo, 3.3V to ADC and probes.](images/build-guide/01-system-map.svg)](images/build-guide/01-system-map.svg)
+
+[![One probe channel: 10k pull-up to 3.3V, tip and ADC at the sense node, 100nF and sleeve to ground; display extension pin table.](images/build-guide/02-probe-and-harness.svg)](images/build-guide/02-probe-and-harness.svg)
+
+[![Existing unqualified IRLZ44N fan circuit with gate pull-down, plus servo and passive piezo wiring.](images/build-guide/03-output-wiring.svg)](images/build-guide/03-output-wiring.svg)
+
+[![Four assembly stages and separate USB flashing and external-power UART test arrangements.](images/build-guide/04-assembly-and-test.svg)](images/build-guide/04-assembly-and-test.svg)
+
 Run from `firmware/` with PlatformIO installed:
 
 ```powershell

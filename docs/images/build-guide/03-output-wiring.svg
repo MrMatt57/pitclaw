@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="810" viewBox="0 0 1120 810" role="img" aria-labelledby="title desc"><title id="title">03 / Existing output wiring</title><desc id="desc">Retained hardware — the direct 3.3V IRLZ44N gate drive remains UNQUALIFIED.</desc><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8" fill="#536777"/></marker></defs><rect width="1120" height="810" fill="#f4f7fa"/>
+<text x="36" y="45" font-family="Arial, sans-serif" font-size="28" fill="#173248" font-weight="700">03 / Existing output wiring</text>
+<text x="36" y="76" font-family="Arial, sans-serif" font-size="16" fill="#536777" font-weight="400">Retained hardware — the direct 3.3V IRLZ44N gate drive remains UNQUALIFIED.</text>
+<text x="95" y="145" font-family="Arial, sans-serif" font-size="21" fill="#ba4c16" font-weight="700">+12V</text>
+<path d="M140 155 L140 195" fill="none" stroke="#ba4c16" stroke-width="3" stroke-linejoin="round"/>
+<rect x="60" y="195" width="175" height="105" rx="12" fill="white" stroke="#ba4c16" stroke-width="2"/>
+<text x="78" y="227" font-family="Arial, sans-serif" font-size="20" fill="#ba4c16" font-weight="700">5015 blower</text>
+<text x="78" y="256" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">+  to 12V</text>
+<text x="78" y="281" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">−  to drain</text>
+<path d="M140 300 L140 350 L400 350 L400 385" fill="none" stroke="#ba4c16" stroke-width="3" stroke-linejoin="round"/>
+<rect x="315" y="385" width="235" height="125" rx="12" fill="white" stroke="#173248" stroke-width="2"/>
+<text x="333" y="417" font-family="Arial, sans-serif" font-size="20" fill="#173248" font-weight="700">IRLZ44N</text>
+<text x="333" y="446" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">G = gate; D = drain</text>
+<text x="333" y="471" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">S = source; tab = drain</text>
+<text x="333" y="496" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Verify actual part pinout.</text>
+<text x="410" y="374" font-family="Arial, sans-serif" font-size="18" fill="#ba4c16" font-weight="700">D</text>
+<path d="M400 510 L400 565" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M400 565 L400 581" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M383.0 581 L417.0 581" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M389.0 588 L411.0 588" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<path d="M395.0 595 L405.0 595" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<text x="418" y="545" font-family="Arial, sans-serif" font-size="18" fill="#173248" font-weight="700">S</text>
+<path d="M65 450 L315 450" fill="none" stroke="#176baf" stroke-width="3" stroke-linejoin="round"/>
+<text x="57" y="430" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">GPIO12</text>
+<text x="288" y="437" font-family="Arial, sans-serif" font-size="18" fill="#176baf" font-weight="700">G</text>
+<circle cx="190" cy="450" r="5" fill="#176baf"/>
+<path d="M190 450 L190 480" fill="none" stroke="#176baf" stroke-width="3" stroke-linejoin="round"/>
+<rect x="178" y="480" width="24" height="55" fill="white" stroke="#173248" stroke-width="3"/>
+<text x="80" y="514" font-family="Arial, sans-serif" font-size="19" fill="#173248" font-weight="700">10kΩ</text>
+<path d="M190 535 L190 565 L400 565" fill="none" stroke="#173248" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="400" cy="565" r="5" fill="#173248"/>
+<rect x="655" y="135" width="425" height="165" rx="12" fill="white" stroke="#176baf" stroke-width="2"/>
+<text x="673" y="167" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">MG90S servo</text>
+<text x="673" y="196" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Power → 5V distribution (not 12V)</text>
+<text x="673" y="221" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Ground → power GND</text>
+<text x="673" y="246" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Signal → GPIO13</text>
+<text x="673" y="271" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Remove linkage before endpoint tests.</text>
+<rect x="655" y="330" width="425" height="135" rx="12" fill="white" stroke="#176baf" stroke-width="2"/>
+<text x="673" y="362" font-family="Arial, sans-serif" font-size="20" fill="#176baf" font-weight="700">Passive piezo</text>
+<text x="673" y="391" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Qualified GPIO-compatible piezo only.</text>
+<text x="673" y="416" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Drive → GPIO14; return → GND.</text>
+<text x="673" y="441" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Confirm type and electrical load.</text>
+<rect x="655" y="495" width="425" height="110" rx="12" fill="white" stroke="#173248" stroke-width="2"/>
+<text x="673" y="527" font-family="Arial, sans-serif" font-size="20" fill="#173248" font-weight="700">Keep cables identifiable</text>
+<text x="673" y="556" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Fan pair and servo cable: label both ends.</text>
+<text x="673" y="581" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">RJ45 powered pinout is not yet defined.</text>
+<rect x="40" y="650" width="1040" height="105" rx="12" fill="white" stroke="#ba4c16" stroke-width="2"/>
+<text x="58" y="682" font-family="Arial, sans-serif" font-size="20" fill="#ba4c16" font-weight="700">Qualification gate — not an approved production driver</text>
+<text x="58" y="711" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">Confirm the fan’s supply-PWM specification, reliable restart, current and MOSFET heating.</text>
+<text x="58" y="736" font-family="Arial, sans-serif" font-size="17" fill="#173248" font-weight="400">This drawing adds no gate driver or protection parts. See the production review before release.</text>
+<text x="36" y="786" font-family="Arial, sans-serif" font-size="15" fill="#536777" font-weight="400">A software “closed” command does not prove mechanical closure or a closed damper after power loss.</text></svg>
