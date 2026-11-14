@@ -1,3 +1,5 @@
+> **Build and release status:** Start with the [short build guide](docs/build-guide.md) and [production review](docs/production-review.md). Physical qualification and listed release blockers remain open.
+
 # <img src="firmware/data/favicon.svg" width="36" height="36" alt="Pit Claw logo"> Pit Claw
 
 [![CI](https://github.com/MrMatt57/pitclaw/actions/workflows/ci.yml/badge.svg)](https://github.com/MrMatt57/pitclaw/actions/workflows/ci.yml)

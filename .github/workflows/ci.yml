@@ -1,66 +1,61 @@
 name: CI
-
 on:
   push:
+    branches: ['**']
   pull_request:
-    branches: [main, "feature/*"]
-
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        default: dev
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  firmware:
-    name: Firmware Build & Test
-    runs-on: ubuntu-latest
+  validate:
+    name: Tests and all firmware images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
-
-      - name: Install PlatformIO
-        run: pip install platformio
-
-      - name: Cache PlatformIO
-        uses: actions/cache@v5
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
         with:
-          path: |
-            ~/.platformio
-            .pio
-          key: pio-${{ hashFiles('firmware/platformio.ini') }}
-          restore-keys: pio-
-
-      - name: Build firmware
-        run: pio run -e wt32_sc01_plus
+          node-version: '22'
+      - name: Install build tools
+        run: |
+          pip install platformio==6.1.18
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-dev
+      - name: Set build version
+        env:
+          BUILD_VERSION: ${{ inputs.version || 'dev' }}
+        run: python scripts/release_artifacts.py --set-version
+      - name: JavaScript syntax
+        run: |
+          node --check firmware/data/app.js
+          node --check firmware/data/sw.js
+      - name: Desktop regression tests
         working-directory: firmware
-
-      - name: Run desktop tests
         run: pio test -e native
+      - name: Build controller, commissioning firmware and SDL simulator
         working-directory: firmware
-
-  simulator:
-    name: Simulator Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Install PlatformIO
-        run: pip install platformio
-
-      - name: Install SDL2
-        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev
-
-      - name: Cache PlatformIO
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.platformio
-            .pio
-          key: pio-sim-${{ hashFiles('firmware/platformio.ini') }}
-          restore-keys: pio-sim-
-
-      - name: Build simulator
-        run: pio run -e simulator
+        run: pio run -e wt32_sc01_plus -e bench -e simulator
+      - name: Build web filesystem
         working-directory: firmware
+        run: pio run -e wt32_sc01_plus -t buildfs
+      - name: Smoke test shared simulator protocol
+        run: node scripts/simulator_smoke.mjs
+      - name: Package versioned images and checksums
+        env:
+          BUILD_VERSION: ${{ inputs.version || 'dev' }}
+        run: python scripts/release_artifacts.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-images
+          path: release/
+          if-no-files-found: error

@@ -139,6 +139,7 @@ void test_lid_open_detection_temp_drop(void) {
 void test_lid_open_output_is_zero(void) {
     float setpoint = 250.0f;
 
+    pid->compute(setpoint, setpoint); // Arm only after reaching setpoint.
     // Trigger lid-open
     pid->compute(230.0f, setpoint);
     TEST_ASSERT_TRUE(pid->isLidOpen());
@@ -151,6 +152,7 @@ void test_lid_open_output_is_zero(void) {
 void test_lid_open_recovery(void) {
     float setpoint = 250.0f;
 
+    pid->compute(setpoint, setpoint); // Arm only after reaching setpoint.
     // Trigger lid-open
     pid->compute(230.0f, setpoint);
     TEST_ASSERT_TRUE(pid->isLidOpen());
@@ -168,6 +170,7 @@ void test_lid_open_recovery_exact_threshold(void) {
     float setpoint = 250.0f;
     float recoverThreshold = setpoint * (1.0f - LID_OPEN_RECOVER_PCT / 100.0f);  // 245.0
 
+    pid->compute(setpoint, setpoint); // Arm only after reaching setpoint.
     // Trigger lid-open
     pid->compute(230.0f, setpoint);
     TEST_ASSERT_TRUE(pid->isLidOpen());
@@ -193,6 +196,7 @@ void test_lid_open_with_different_setpoint(void) {
     // Recover threshold = 400 * 0.98 = 392
     float setpoint = 400.0f;
 
+    pid->compute(setpoint, setpoint);
     pid->compute(375.0f, setpoint);
     TEST_ASSERT_TRUE(pid->isLidOpen());
 
@@ -206,6 +210,7 @@ void test_lid_open_with_different_setpoint(void) {
 void test_lid_open_repeated_cycles(void) {
     float setpoint = 250.0f;
 
+    pid->compute(setpoint, setpoint);
     // First lid-open cycle
     pid->compute(230.0f, setpoint);
     TEST_ASSERT_TRUE(pid->isLidOpen());
@@ -236,6 +241,7 @@ void test_compute_returns_zero_on_native(void) {
 void test_begin_resets_lid_state(void) {
     float setpoint = 250.0f;
 
+    pid->compute(setpoint, setpoint); // Arm only after reaching setpoint.
     // Trigger lid-open
     pid->compute(230.0f, setpoint);
     TEST_ASSERT_TRUE(pid->isLidOpen());
@@ -255,8 +261,27 @@ void test_begin_resets_enabled(void) {
 // Main
 // --------------------------------------------------------------------------
 
+void test_cold_start_does_not_trigger_lid_open(void) {
+    pid->compute(70.0f, 225.0f);
+    TEST_ASSERT_FALSE(pid->isLidOpen());
+    pid->compute(200.0f, 225.0f);
+    TEST_ASSERT_FALSE(pid->isLidOpen());
+}
+
+void test_setpoint_change_rearms_after_heatup(void) {
+    pid->compute(225.0f, 225.0f);
+    pid->resetIntegrator();
+    pid->compute(225.0f, 300.0f);
+    TEST_ASSERT_FALSE(pid->isLidOpen());
+    pid->compute(300.0f, 300.0f);
+    pid->compute(250.0f, 300.0f);
+    TEST_ASSERT_TRUE(pid->isLidOpen());
+}
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
+    RUN_TEST(test_cold_start_does_not_trigger_lid_open);
+    RUN_TEST(test_setpoint_change_rearms_after_heatup);
 
     // Constructor/begin defaults
     RUN_TEST(test_default_tunings);

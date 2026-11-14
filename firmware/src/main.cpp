@@ -7,6 +7,7 @@
 // --- Module headers ---
 #include "temp_manager.h"
 #include "pid_controller.h"
+#include "pit_safety.h"
 #include "fan_controller.h"
 #include "servo_controller.h"
 #include "config_manager.h"
@@ -40,6 +41,13 @@ static float    g_prevSetpoint   = 225.0f;   // Previous setpoint for change det
 static bool     g_pitReached     = false;     // Has pit ever reached setpoint?
 static uint32_t g_cookStartTime  = 0;         // Epoch when cook timer started
 static unsigned long g_lastPidMs = 0;         // Last PID computation timestamp
+
+static PitSafety g_pitSafety;
+// All control, storage and protocol values are Fahrenheit; editors are labeled F.
+static float displayTemp(float f) {
+    return configManager.isFahrenheit() ? f : (f - 32.0f) * 5.0f / 9.0f;
+}
+static float displayTarget(float f) { return f > 0 ? displayTemp(f) : 0; }
 
 // --- Boot phase state machine ---
 enum class BootPhase { SPLASH, WIZARD, RUNNING };
@@ -127,7 +135,9 @@ static void ui_cb_alarm_ack() {
 
 static void ui_cb_units(bool isFahrenheit) {
     configManager.setUnits(isFahrenheit ? "F" : "C");
-    tempManager.setUseFahrenheit(isFahrenheit);
+    ui_set_units(isFahrenheit);
+    ui_graph_clear();
+    configManager.save();
 }
 
 static void ui_cb_fan_mode(const char* mode) {
@@ -152,7 +162,15 @@ enum class HwTest { NONE, FAN, SERVO, BUZZER };
 static HwTest g_hwTest = HwTest::NONE;
 static unsigned long g_hwTestStartMs = 0;
 
+static void stopWizardOutputs() {
+    fanController.off();
+    servoController.setPosition(0);
+    alarmManager.setBuzzer(false);
+    g_hwTest = HwTest::NONE;
+}
+
 static void wiz_fan_test() {
+    stopWizardOutputs();
     fanController.setSpeed(75);
     fanController.update();
     g_hwTest = HwTest::FAN;
@@ -160,18 +178,21 @@ static void wiz_fan_test() {
 }
 
 static void wiz_servo_test() {
+    stopWizardOutputs();
     servoController.setPosition(100);
     g_hwTest = HwTest::SERVO;
     g_hwTestStartMs = millis();
 }
 
 static void wiz_buzzer_test() {
+    stopWizardOutputs();
     alarmManager.setBuzzer(true);
     g_hwTest = HwTest::BUZZER;
     g_hwTestStartMs = millis();
 }
 
 static void wiz_complete() {
+    stopWizardOutputs();
     configManager.setSetupComplete(true);
     configManager.save();
     Serial.println("[BOOT] Setup wizard complete");
@@ -209,6 +230,7 @@ void setup() {
     // 3. Initialize display and show boot splash immediately
     //    Splash is visible while remaining hardware modules initialize.
     ui_init();
+    ui_set_units(configManager.isFahrenheit());
     ui_boot_splash_init();
     ui_tick(10);
     ui_handler();
@@ -222,7 +244,7 @@ void setup() {
         tempManager.setCoefficients(i, ps.a, ps.b, ps.c);
         tempManager.setOffset(i, ps.offset);
     }
-    tempManager.setUseFahrenheit(configManager.isFahrenheit());
+    tempManager.setUseFahrenheit(true);
 
     // 5. Initialize PID controller with saved tunings
     pidController.begin(cfg.pid.kp, cfg.pid.ki, cfg.pid.kd);
@@ -267,9 +289,9 @@ void setup() {
     ui_set_wifi_callback(ui_cb_wifi_action);
 
     // Set initial display state
-    ui_update_setpoint(g_setpoint);
-    ui_update_meat1_target(alarmManager.getMeat1Target());
-    ui_update_meat2_target(alarmManager.getMeat2Target());
+    ui_update_setpoint(displayTemp(g_setpoint));
+    ui_update_meat1_target(displayTarget(alarmManager.getMeat1Target()));
+    ui_update_meat2_target(displayTarget(alarmManager.getMeat2Target()));
     ui_update_settings_state(configManager.isFahrenheit(), configManager.getFanMode());
 
     // Pre-populate graph from recovered session data
@@ -279,10 +301,10 @@ void setup() {
             const DataPoint* dp = cookSession.getPoint(i);
             if (dp) {
                 ui_graph_add_point(
-                    dp->pitTemp / 10.0f,
-                    dp->meat1Temp / 10.0f,
-                    dp->meat2Temp / 10.0f,
-                    g_setpoint,
+                    displayTemp(dp->pitTemp / 10.0f),
+                    displayTemp(dp->meat1Temp / 10.0f),
+                    displayTemp(dp->meat2Temp / 10.0f),
+                    displayTemp(g_setpoint),
                     (dp->flags & DP_FLAG_PIT_DISC) != 0,
                     (dp->flags & DP_FLAG_MEAT1_DISC) != 0,
                     (dp->flags & DP_FLAG_MEAT2_DISC) != 0
@@ -400,6 +422,18 @@ void loop() {
     // 1. Read temperatures from all probes (internally gated at TEMP_SAMPLE_INTERVAL_MS)
     tempManager.update();
 
+    bool outputsAllowed = g_pitSafety.update(tempManager.isConnected(PROBE_PIT), now);
+    if (!outputsAllowed) {
+        pidController.setEnabled(false);
+        fanController.off();
+        servoController.setPosition(0.0f);
+        g_pitReached = false;
+    } else if (!pidController.isEnabled()) {
+        pidController.setEnabled(true);
+        pidController.resetIntegrator();
+        g_lastPidMs = now;
+    }
+
     // 2. PID computation (every PID_SAMPLE_MS)
     if (now - g_lastPidMs >= PID_SAMPLE_MS) {
         g_lastPidMs = now;
@@ -412,8 +446,8 @@ void loop() {
         }
 
         // Only compute PID when pit probe is connected. When disconnected,
-        // _pidOutput retains its last value to maintain current fire management.
-        if (tempManager.isConnected(PROBE_PIT)) {
+        // Invalid pit input inhibits outputs before PID computation.
+        if (outputsAllowed) {
             float pitTemp = tempManager.getPitTemp();
             pidController.compute(pitTemp, g_setpoint);
 
@@ -427,7 +461,7 @@ void loop() {
     }
 
     // 3. Mode-aware fan + damper from PID output (split-range coordination)
-    {
+    if (outputsAllowed) {
         SplitRangeOutput sr = splitRange(pidController.getOutput(),
                                          configManager.getFanMode(),
                                          configManager.getFanOnThreshold());
@@ -477,14 +511,14 @@ void loop() {
     if (now - g_lastDisplayMs >= 1000) {
         g_lastDisplayMs = now;
 
-        ui_update_temps(tempManager.getPitTemp(),
-                        tempManager.getMeat1Temp(),
-                        tempManager.getMeat2Temp(),
+        ui_update_temps(displayTemp(tempManager.getPitTemp()),
+                        displayTemp(tempManager.getMeat1Temp()),
+                        displayTemp(tempManager.getMeat2Temp()),
                         tempManager.isConnected(PROBE_PIT),
                         tempManager.isConnected(PROBE_MEAT1),
                         tempManager.isConnected(PROBE_MEAT2));
 
-        ui_update_setpoint(g_setpoint);
+        ui_update_setpoint(displayTemp(g_setpoint));
         ui_update_output_bars(fanController.getCurrentSpeedPct(),
                               servoController.getCurrentPositionPct());
 
@@ -533,17 +567,17 @@ void loop() {
         ui_update_alerts(topAlarm, pidController.isLidOpen(), errorManager.isFireOut(), probeErrors);
 
         // Meat targets
-        ui_update_meat1_target(alarmManager.getMeat1Target());
-        ui_update_meat2_target(alarmManager.getMeat2Target());
+        ui_update_meat1_target(displayTarget(alarmManager.getMeat1Target()));
+        ui_update_meat2_target(displayTarget(alarmManager.getMeat2Target()));
     }
 
     // Graph update (every 5 seconds)
     if (now - g_lastGraphMs >= 5000) {
         g_lastGraphMs = now;
-        ui_graph_add_point(tempManager.getPitTemp(),
-                           tempManager.getMeat1Temp(),
-                           tempManager.getMeat2Temp(),
-                           g_setpoint,
+        ui_graph_add_point(displayTemp(tempManager.getPitTemp()),
+                           displayTemp(tempManager.getMeat1Temp()),
+                           displayTemp(tempManager.getMeat2Temp()),
+                           displayTemp(g_setpoint),
                            !tempManager.isConnected(PROBE_PIT),
                            !tempManager.isConnected(PROBE_MEAT1),
                            !tempManager.isConnected(PROBE_MEAT2));
